@@ -1,0 +1,5 @@
+numpy==1.10.2
+PyForms==0.1.2
+PyOpenGL==3.1.0
+visvis==1.9.2
+wheel==0.24.0
