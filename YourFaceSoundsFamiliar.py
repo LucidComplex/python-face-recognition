@@ -1,3 +1,6 @@
+import os
+
+import cv2
 import pyforms
 from pyforms import BaseWidget
 from pyforms.Controls import ControlText, ControlLabel, ControlButton, ControlImage, ControlFile, ControlDir
@@ -9,6 +12,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._imagepath = ControlText('Path')
         self._browsebuttonpredict = ControlButton('Browse')
         self._selectfile = ControlFile()
+        self._selectfile.changed = self.__change_path
         self._predictimage = ControlImage()
         self._predictbutton = ControlButton('Predict')
         self._predicteddetails = ControlLabel('Details')
@@ -17,6 +21,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         #Train Tab
         self._pername = ControlText('Name')
         self._selectdir = ControlDir()
+        self._selectdir.changed = self.__change_path_dir
         self._imagetotrain = ControlImage()
         self._trainbutton = ControlButton('Train')
         self._formset = [ {
@@ -27,6 +32,15 @@ class YourFaceSoundsFamiliar(BaseWidget):
             'Train': ['_pername','=','_selectdir',
                       '=','_imagetotrain','=','_trainbutton']
             } ]
+
+
+    def __change_path(self):
+        self._predictimage.value = self._selectfile.value
+
+    def __change_path_dir(self):
+        listofimages = os.listdir(self._selectdir.value)
+        listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename),1) for filename in listofimages]
+        self._imagetotrain.value = listofimages
 
 
 if __name__ == '__main__':
