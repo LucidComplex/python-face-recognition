@@ -32,11 +32,14 @@ class FaceDetection():
             cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
         return image
 
-    def resizeimage(self, image):
+    def resizeimageb(self, image):
         r = 90.0 / image.shape[1]
         dim = (90, int(image.shape[0] * r))
         resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
         return resized
-
+    def resizeimagea(self, image):
+        resized = cv2.resize(image, (30,30), interpolation=cv2.INTER_AREA)
+        resizedgray = cv2.cvtColor(resized,cv2. COLOR_BGR2GRAY)
+        return resized, resizedgray
 if __name__ == '__main__':
     FaceDetection('/home/paks/Pictures/bang.jpg')

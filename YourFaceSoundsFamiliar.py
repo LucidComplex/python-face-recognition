@@ -45,9 +45,11 @@ class YourFaceSoundsFamiliar(BaseWidget):
     def __change_path_dir(self):
         listofimages = os.listdir(self._selectdir.value)
         listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename)) for filename in listofimages]
-        resizedimages = [FaceDetection().resizeimage(image) for image in listofimages]
+        resizedimages = [FaceDetection().resizeimageb(image) for image in listofimages]
         croppedimages = [FaceDetection().cropface(image) for image in resizedimages]
-        self._imagetotrain.value = croppedimages
+        resizedcroppedimages = [FaceDetection().resizeimagea(image)[0] for image in croppedimages]
+        resizedcroppedimagesgray = [FaceDetection().resizeimagea(image)[1] for image in croppedimages]
+        self._imagetotrain.value = resizedcroppedimagesgray
 
 
 
