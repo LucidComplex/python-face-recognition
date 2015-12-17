@@ -106,27 +106,26 @@ class NeuralNetwork(object):
         r = (lambda_/(2.0*m))*(sum1 + sum2)
         J += r
 
-        #for t in range(m):
-        z2 = np.matrix(theta1.dot(a1[0,:].T)).T #change to t later
-        a2 = sigmoid(z2)
-        a2 = insert_bias_row(a2)
+        for t in range(m):
+            z2 = np.matrix(theta1.dot(a1[t,:].T)).T #change to t later
+            a2 = sigmoid(z2)
+            a2 = insert_bias_row(a2)
 
-        z3 = theta2.dot(a2)
-        h = sigmoid(z3)
+            z3 = theta2.dot(a2)
+            h = sigmoid(z3)
 
-        z2 = insert_bias_row(z2)
+            z2 = insert_bias_row(z2)
 
-        output = np.matrix(yk[:,0]).T #change to t later
+            output = np.matrix(yk[:,t]).T #change to t later
 
-        d3 = np.matrix(h - output)
-        sg = np.matrix(sigmoid_gradient(z2))
-        d2 = np.multiply(theta2.T.dot(d3),sg)
+            d3 = np.matrix(h - output)
+            sg = np.matrix(sigmoid_gradient(z2))
+            d2 = np.multiply(theta2.T.dot(d3),sg)
+            d2 = d2[1:,:]
 
-        theta2_grad += d3.dot(np.matrix(a2))
-        print theta2_grad.shape
-        theta1_grad += d2.dot(a1[0,:]) #change to t later
-        print theta1_grad.shape
-            
+            theta2_grad += d3.dot(a2.T)
+            theta1_grad += d2.dot(np.matrix(a1[t,:])) #change to t later
+        
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()
