@@ -1,18 +1,78 @@
 import numpy as np
-
+from Utils import sigmoid, insert_bias, normalize
 
 class NeuralNetwork(object):
+    INIT_EPSILON = 0.12
+    input_size = 20 * 20
+    hidden_size = 400
+    lambda_ = 0
 
-    def __init__(self, input_size, output_size):
-        self.hidden_layer_size = input_size / 4
-        self.theta = np.ones((1, input_size))
+    def __init__(self, num_labels):
+        self.num_labels = num_labels
+        theta1 = np.random.rand(self.input_size, self.input_size + 1)
+        theta2 = np.random.rand(num_labels, self.input_size + 1)
+        self.nn_params = np.append(theta1.flatten(), theta2.flatten())
 
     def train(self, image):
-
+        # X = image
+        y = np.zeros((1, 1))
+        m = 0
+        with open('X.csv') as file_:
+            all_lines = []
+            for line in file_:
+                m += 1
+                all_lines += line.split(',')
+            X = np.array([all_lines], dtype=np.float)
+        X = X.reshape((m, self.input_size))
+        with open('y.csv') as file_:
+            all_lines = []
+            for line in file_:
+                all_lines += line.split(',')
+            y = np.array([all_lines], dtype=np.float)
+        y = y.reshape((m, 1))
+        # X = normalize(X)
+        self.cost_function(X, y)
 
     def test(self):
-        print self.theta
+        self.train('who')
+        pass
 
+
+    def cost_function(self, X, y):
+        nn_params = self.nn_params
+        input_size = self.input_size
+        num_labels = self.num_labels
+
+        theta1 = nn_params[:(input_size * (input_size + 1))].reshape(
+            (input_size, input_size + 1))
+        theta2 = nn_params[(input_size * (input_size + 1)):].reshape(
+            (num_labels, input_size + 1))
+
+        m = X.shape[0]
+
+        J = 0
+        theta1_grad = np.zeros(theta1.shape)
+        theta2_grad = np.zeros(theta2.shape)
+
+        X = insert_bias(X)
+
+        z2 = theta1.dot(X.T)
+        a2 = sigmoid(z2)
+
+        a2 = insert_bias(a2.T)
+
+        z3 = theta2.dot(a2.T)
+        h = sigmoid(z3)
+
+        yk = np.zeros((num_labels, m))
+        for i in range(m):
+            yk[y[i], i] = 1
+
+        print h
+        print 1 - h
+
+        error = (-yk) * np.log(h) - (1 - yk) * np.log(1 - h)
+        print error
 
 if __name__ == '__main__':
-    NeuralNetwork(500, 10).test()
+    NeuralNetwork(10).test()
