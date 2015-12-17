@@ -53,6 +53,5 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._imagetotrain.value = resizedcroppedimages
 
 
-
 if __name__ == '__main__':
     pyforms.startApp(YourFaceSoundsFamiliar)
