@@ -1,11 +1,12 @@
 import numpy as np
-from Utils import sigmoid, insert_bias, normalize
+from Utils import (sigmoid, sigmoid_gradient,
+    insert_bias, insert_bias_row, normalize)
 
 class NeuralNetwork(object):
     INIT_EPSILON = 0.12
     input_size = 20 * 20
     hidden_size = 25
-    lambda_ = 0
+    lambda_ = 1
 
     def __init__(self, num_labels):
         self.num_labels = num_labels
@@ -62,6 +63,7 @@ class NeuralNetwork(object):
         input_size = self.input_size
         num_labels = self.num_labels
         hidden_size = self.hidden_size
+        lambda_ = self.lambda_
         
         theta1 = nn_params[:((hidden_size) * (input_size + 1))].reshape(
             (hidden_size, input_size + 1))
@@ -74,9 +76,9 @@ class NeuralNetwork(object):
         theta1_grad = np.zeros(theta1.shape)
         theta2_grad = np.zeros(theta2.shape)
 
-        X = insert_bias(X)
+        a1 = insert_bias(X)
 
-        z2 = theta1.dot(X.T)
+        z2 = theta1.dot(a1.T)
         a2 = sigmoid(z2)
         
         a2 = insert_bias(a2.T)
@@ -86,13 +88,48 @@ class NeuralNetwork(object):
         
         yk = np.zeros((num_labels, m))
         
+
+        #back propagation
+
         for i in range(m):
             yk[int(y[i])-1, i] = 1.0
 
         error = (-yk) * np.log(h) - (1 - yk) * np.log(1 - h)
         J = (1.0/m)*sum(sum(error))
 
-        
+        t1 = np.array(theta1[:,1:])
+        t2 = np.array(theta2[:,1:])
+
+        sum1 = sum(sum(np.power(t1,2)))
+        sum2 = sum(sum(np.power(t2,2)))
+
+        r = (lambda_/(2.0*m))*(sum1 + sum2)
+        J += r
+
+        #for t in range(m):
+        z2 = np.matrix(theta1.dot(a1[0,:].T)).T #change to t later
+        a2 = sigmoid(z2)
+        a2 = insert_bias_row(a2)
+
+        z3 = theta2.dot(a2)
+        h = sigmoid(z3)
+
+        z2 = insert_bias_row(z2)
+
+        output = np.matrix(yk[:,0]).T #change to t later
+
+        d3 = np.matrix(h - output)
+        sg = np.matrix(sigmoid_gradient(z2))
+        print theta2.shape
+        d2 = theta2.dot(d3)*sg
+        print d2.shape
+        print 'mana'
+
+        theta2_grad += d3.dot(np.matrix(a2))
+        print theta2_grad.shape
+        theta1_grad += d2.dot(a1[0,:]) #change to t later
+        print theta1_grad.shape
+            
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()

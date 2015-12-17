@@ -10,6 +10,10 @@ def insert_bias(matrix):
             axis=1)
     return matrix
 
+def insert_bias_row(matrix):
+    matrix = np.insert(matrix, 0, 1,
+            axis=0)
+    return matrix
 
 def normalize(matrix):
     matrix_norm = matrix
@@ -22,3 +26,6 @@ def normalize(matrix):
     matrix_norm = (matrix - mu) / sigma
 
     return matrix_norm
+
+def sigmoid_gradient(matrix):
+    return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
