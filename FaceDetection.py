@@ -9,11 +9,10 @@ class FaceDetection():
     def  __detect_face(self, image):
         faceCascade = cv2.CascadeClassifier(self._cascPath)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("fasdf",gray)
         faces = faceCascade.detectMultiScale(
                     gray,
-                    scaleFactor=1.03,
-                    minNeighbors=5,
+                    scaleFactor=1.05,
+                    minNeighbors=8,
                     minSize=(30, 30),
                     flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 )
@@ -21,6 +20,7 @@ class FaceDetection():
 
     def cropface(self, image):
         faces = self.__detect_face(image)
+        croppedface = None
         for (x, y, w, h) in faces:
             croppedface = image[y:y+h,x:x+w]
         return croppedface
@@ -32,8 +32,8 @@ class FaceDetection():
         return image
 
     def resizeimageb(self, image):
-        r = 175.0 / image.shape[1]
-        dim = (175, int(image.shape[0] * r))
+        r = 200.0 / image.shape[1]
+        dim = (200, int(image.shape[0] * r))
         resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
         return resized
 
