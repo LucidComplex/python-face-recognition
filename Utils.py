@@ -15,17 +15,17 @@ def insert_bias_row(matrix):
             axis=0)
     return matrix
 
-def normalize(matrix):
+def normalize(matrix, *args):
     matrix_norm = matrix
-    mu = np.zeros((1, matrix.shape[1]))
-    sigma = np.zeros((1, matrix.shape[1]))
-
-    mu = np.mean(matrix, axis=0)
-    sigma = np.std(matrix, axis=0)
+    if len(args) > 0:
+        mu, sigma = args
+    else:
+        mu = np.mean(matrix, axis=0)
+        sigma = np.std(matrix, axis=0)
 
     matrix_norm = (matrix - mu) / sigma
 
-    return matrix_norm
+    return matrix_norm, mu, sigma
 
 def sigmoid_gradient(matrix):
     return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
@@ -62,5 +62,3 @@ def predict(Theta1, Theta2, X):
 
     print p
 
-def accuracy(p, y):
-    

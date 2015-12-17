@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import optimize
-from Utils import (sigmoid, sigmoid_gradient, predict,
+from Utils import (sigmoid, sigmoid_gradient,
     insert_bias, insert_bias_row, normalize, wrap, f, fprime, initialize_epsilon)
 
 class NeuralNetwork(object):
@@ -9,15 +9,35 @@ class NeuralNetwork(object):
         self.config = kwargs.get('config',
                 {'input_size': 30 * 30, 'hidden_size': 30 * 30, 'lambda': 1,
                     'num_labels': 1})
-
         self.INIT_EPSILON = initialize_epsilon(self.config['input_size'],
             self.config['hidden_size'])
+        try:
+            theta1 = None
+            theta2 = None
+            with open('Theta1.csv') as file_:
+                all_lines = []
+                for line in file_:
+                    all_lines += line.split(',')
+                theta1 = np.array([all_lines], dtype=np.float)
+            theta1 = theta1.reshape((self.hidden_size, self.input_size + 1))
+            with open('Theta1.csv') as theta1_file:
+                all_lines = []
+                for line in theta1_file:
+                    all_lines += line.split(',')
+                theta2 = np.array([all_lines])
+            theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
+        except IOError:
+            theta1 = np.random.rand(self.config['hidden_size'], self.config['input_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+            theta2 = np.random.rand(self.config['num_labels'], self.config['hidden_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+        finally:
+            self.nn_params = wrap(theta1, theta2)
 
-    def train(self, image_path):
+
+    def train(self, image_matrix_path):
         # X = image
         y = np.zeros((1, 1))
         m = 0
-        with open(image_path) as file_:
+        with open(image_matrix_path) as file_:
             all_lines = []
             for line in file_:
                 m += 1
@@ -32,33 +52,25 @@ class NeuralNetwork(object):
             y = np.array([all_lines], dtype=np.float)
         y = y.reshape((m, 1))
         """
+        y = np.ones((10, self.config['num_labels']))
 
-        # X = normalize(X)
-        theta1 = np.random.rand(self.config['hidden_size'], self.config['input_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
-        theta2 = np.random.rand(self.config['num_labels'], self.config['hidden_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
-#        theta1 = np.zeros((1, self.input_size + 1))
-#        theta2 = np.zeros((1, self.hidden_size + 1))
-#        with open('Theta1.csv') as file_:
-#            all_lines = []
-#            for line in file_:
-#                all_lines += line.split(',')
-#            theta1 = np.array([all_lines], dtype=np.float)
-#        theta1 = theta1.reshape((self.hidden_size, self.input_size + 1))
-#
-#        with open('Theta2.csv') as file_:
-#            all_lines = []
-#            for line in file_:
-#                all_lines += line.split(',')
-#            theta2 = np.array([all_lines], dtype=np.float)
-#        theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
-        nn_params = wrap(theta1, theta2)
-        self.nn_cfx(X, y, nn_params)
+        X, mu, sigma = normalize(X)
 
-        res1 = optimize.fmin_cg(f, nn_params, args=(self, X, y), maxiter=50,
+        self.nn_params = optimize.fmin_cg(f, self.nn_params, args=(self, X, y), maxiter=50,
             fprime=fprime)
-        print res1
 
-    def test(self):
+        # save nn_parameters
+        hidden_size = self.config['hidden_size']
+        input_size = self.config['input_size']
+        num_labels = self.config['num_labels']
+        theta1 = self.nn_params[:((hidden_size) * (input_size + 1))].reshape(
+            (hidden_size, input_size + 1))
+        theta2 = self.nn_params[((hidden_size) * (input_size + 1)):].reshape(
+            (num_labels, hidden_size + 1))
+        np.savetxt('Theta1.csv', theta1, delimiter=',')
+        np.savetxt('Theta2.csv', theta2, delimiter=',')
+
+    def predict(self, image):
         pass
 
 
@@ -136,7 +148,6 @@ class NeuralNetwork(object):
 
         theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
-        predict(theta1_grad, theta2_grad, X, y)
         return J, wrap(theta1_grad, theta2_grad)
 
 
