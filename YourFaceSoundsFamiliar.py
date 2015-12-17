@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 import cv2
 import pyforms
 from pyforms import BaseWidget
@@ -49,7 +49,8 @@ class YourFaceSoundsFamiliar(BaseWidget):
         croppedimages = [FaceDetection().cropface(image) for image in resizedimages]
         resizedcroppedimages = [FaceDetection().resizeimagea(image)[0] for image in croppedimages]
         resizedcroppedimagesgray = [FaceDetection().resizeimagea(image)[1] for image in croppedimages]
-        self._imagetotrain.value = resizedcroppedimagesgray
+        trainingset = [np.array(image).flatten() for image in resizedcroppedimagesgray]
+        self._imagetotrain.value = resizedcroppedimages
 
 
 
