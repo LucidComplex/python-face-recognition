@@ -125,8 +125,17 @@ class NeuralNetwork(object):
 
             theta2_grad += d3.dot(a2.T)
             theta1_grad += d2.dot(np.matrix(a1[t,:])) #change to t later
+
+        # regularization
+
+        theta1_grad[:,0] = np.matrix(theta1_grad[:,0]/(m*1.0))
+        theta1_grad[:,1:] = (theta1_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta1[:,1:])))
         
-        return J, 
+        theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))        
+        theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
+
+        return J, np.append(theta1_grad.flatten(), theta2_grad.flatten()).shape
+        
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()
