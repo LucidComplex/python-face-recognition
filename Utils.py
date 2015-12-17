@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
@@ -46,3 +46,6 @@ def wrap(*args):
     for a in args:
         matrix = np.append(matrix, a.reshape((1, a.size)))
     return matrix[1:]
+
+def initialize_epsilon(L_in, L_out):
+    return (math.sqrt(6)*1.0)/(math.sqrt(L_in+L_out+1))
