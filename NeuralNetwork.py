@@ -83,16 +83,16 @@ class NeuralNetwork(object):
 
         z3 = theta2.dot(a2.T)
         h = sigmoid(z3)
-
+        
         yk = np.zeros((num_labels, m))
+        
         for i in range(m):
-            yk[y[i], i] = 1
-
-        print h
-        print 1 - h
+            yk[int(y[i])-1, i] = 1.0
 
         error = (-yk) * np.log(h) - (1 - yk) * np.log(1 - h)
-        print error
+        J = (1.0/m)*sum(sum(error))
+
+        
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()
