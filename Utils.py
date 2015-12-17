@@ -55,12 +55,21 @@ def predict(Theta1, Theta2, X):
 
     num_labels = Theta2.shape[0]
     p = np.zeros((m, 1))
-    h1 = sigmoid(insert_bias(X).dot(Theta1.T))
-    h2 = sigmoid(insert_bias(h1).dot(Theta2.T))
+    a1 = insert_bias(X)
+    h1 = sigmoid(a1.dot(Theta1.T))
+    z2 = insert_bias(h1)
+    h2 = sigmoid(z2.dot(Theta2.T))
 
-    p = h2.argmax(axis=1)
+    print p.shape
+    #p = h2.max(axis=1)
+    #for i in range(p.shape[0]):
+    #    print 'predicted: ', p[i]
 
-    print p
+    return p
 
 def accuracy(p, y):
-    
+    sum = 0.0
+    #for i in range(p.shape[0]):
+    #    #if (p[i]) == y[i]:
+    #    print p[i], ' yooow ', y[i]
+    return (sum/p.shape[0])*100

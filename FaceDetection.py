@@ -42,4 +42,5 @@ class FaceDetection():
         resizedgray = cv2.cvtColor(resized,cv2. COLOR_BGR2GRAY)
         return resized, resizedgray
 if __name__ == '__main__':
-    FaceDetection('/home/paks/Pictures/bang.jpg')
+    #FaceDetection('/home/paks/Pictures/bang.jpg')
+    FaceDetection()

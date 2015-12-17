@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import optimize
-from Utils import (sigmoid, sigmoid_gradient, predict,
+from Utils import (sigmoid, sigmoid_gradient, predict, accuracy,
     insert_bias, insert_bias_row, normalize, wrap, f, fprime, initialize_epsilon)
 
 class NeuralNetwork(object):
@@ -137,7 +137,7 @@ class NeuralNetwork(object):
 
         theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
-        predict(theta1_grad, theta2_grad, X, y)
+        print accuracy(predict(theta1_grad, theta2_grad, X), y)
         return J, wrap(theta1_grad, theta2_grad)
 
 
