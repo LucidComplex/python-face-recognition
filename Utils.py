@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
@@ -46,3 +46,21 @@ def wrap(*args):
     for a in args:
         matrix = np.append(matrix, a.reshape((1, a.size)))
     return matrix[1:]
+
+def initialize_epsilon(L_in, L_out):
+    return (math.sqrt(6)*1.0)/(math.sqrt(L_in+L_out+1))
+
+def predict(Theta1, Theta2, X):
+    m = X.shape[0]
+
+    num_labels = Theta2.shape[0]
+    p = np.zeros((m, 1))
+    h1 = sigmoid(insert_bias(X).dot(Theta1.T))
+    h2 = sigmoid(insert_bias(h1).dot(Theta2.T))
+
+    p = h2.argmax(axis=1)
+
+    print p
+
+def accuracy(p, y):
+    
