@@ -30,7 +30,6 @@ def normalize(matrix):
 def sigmoid_gradient(matrix):
     return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
 
-
 def f(x, *args):
     J, grad = args
     return J
@@ -39,3 +38,8 @@ def fprime(x, *args):
     J, grad = args
     return grad
 
+def wrap(*args):
+    matrix = np.ones((1, 1))
+    for a in args:
+        matrix = np.append(matrix, a.reshape((1, a.size)))
+    return matrix[1:]

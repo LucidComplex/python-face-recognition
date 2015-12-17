@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import optimize
 from Utils import (sigmoid, sigmoid_gradient,
-    insert_bias, insert_bias_row, normalize, f, fprime)
+    insert_bias, insert_bias_row, normalize, wrap, f, fprime)
 
 class NeuralNetwork(object):
     INIT_EPSILON = 0.12
@@ -14,7 +14,7 @@ class NeuralNetwork(object):
 
         theta1 = np.zeros((1, self.input_size + 1))
         theta2 = np.zeros((1, self.hidden_size + 1))
-
+        """
         with open('Theta1.csv') as file_:
             all_lines = []
             for line in file_:
@@ -28,11 +28,10 @@ class NeuralNetwork(object):
                 all_lines += line.split(',')
             theta2 = np.array([all_lines], dtype=np.float)
         theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
-        
-        #will use this later
-        #theta1 = np.random.rand(self.hidden_size, self.input_size + 1)
-        #theta2 = np.random.rand(self.num_labels, self.hidden_size + 1)
-        self.nn_params = np.append(theta1.flatten(), theta2.flatten())
+        """
+        theta1 = np.random.rand(self.hidden_size, self.input_size + 1)
+        theta2 = np.random.rand(self.num_labels, self.hidden_size + 1)
+        self.nn_params = wrap(theta1, theta2)
 
     def train(self, image):
         # X = image
@@ -68,10 +67,10 @@ class NeuralNetwork(object):
         num_labels = self.num_labels
         hidden_size = self.hidden_size
         lambda_ = self.lambda_
-        
+
         theta1 = nn_params[:((hidden_size) * (input_size + 1))].reshape(
             (hidden_size, input_size + 1))
-        
+
         theta2 = nn_params[((hidden_size) * (input_size + 1)):].reshape(
             (num_labels, hidden_size + 1))
         m = X.shape[0]
@@ -84,14 +83,14 @@ class NeuralNetwork(object):
 
         z2 = theta1.dot(a1.T)
         a2 = sigmoid(z2)
-        
+
         a2 = insert_bias(a2.T)
 
         z3 = theta2.dot(a2.T)
         h = sigmoid(z3)
-        
+
         yk = np.zeros((num_labels, m))
-        
+
 
         #back propagation
 
@@ -134,12 +133,12 @@ class NeuralNetwork(object):
 
         theta1_grad[:,0] = np.matrix(theta1_grad[:,0]/(m*1.0))
         theta1_grad[:,1:] = (theta1_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta1[:,1:])))
-        
-        theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))        
+
+        theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
 
-        return J, np.append(theta1_grad.flatten(), theta2_grad.flatten())
-        
+        return J, wrap(theta1_grad, theta2_grad)
+
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()
