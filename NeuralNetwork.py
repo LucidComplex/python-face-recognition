@@ -4,37 +4,39 @@ from Utils import (sigmoid, sigmoid_gradient,
     insert_bias, insert_bias_row, normalize, wrap, f, fprime, initialize_epsilon)
 
 class NeuralNetwork(object):
-    INIT_EPSILON = 0.12
-    input_size = 20 * 20
-    hidden_size = 25
-    lambda_ = 1
 
-    def __init__(self, num_labels):
-        self.num_labels = num_labels
+    def __init__(self, **kwargs):
+        self.config = kwargs.get('config',
+                {'input_size': 30 * 30, 'hidden_size': 30 * 30, 'lambda': 1,
+                    'num_labels': 1})
 
+        self.INIT_EPSILON = initialize_epsilon(self.config['input_size'],
+            self.config['hidden_size'])
 
-    def train(self, image):
+    def train(self, image_path):
         # X = image
         y = np.zeros((1, 1))
         m = 0
-        with open('X.csv') as file_:
+        with open(image_path) as file_:
             all_lines = []
             for line in file_:
                 m += 1
                 all_lines += line.split(',')
             X = np.array([all_lines], dtype=np.float)
-        X = X.reshape((m, self.input_size))
+        X = X.reshape((m, self.config['input_size']))
+        """
         with open('y.csv') as file_:
             all_lines = []
             for line in file_:
                 all_lines += line.split(',')
             y = np.array([all_lines], dtype=np.float)
         y = y.reshape((m, 1))
-        self.INIT_EPSILON = initialize_epsilon(self.input_size, self.hidden_size)
+        """
+        y = np.array([[1]])
 
         # X = normalize(X)
-        theta1 = np.random.rand(self.hidden_size, self.input_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
-        theta2 = np.random.rand(self.num_labels, self.hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+        theta1 = np.random.rand(self.config['hidden_size'], self.config['input_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+        theta2 = np.random.rand(self.config['num_labels'], self.config['hidden_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
 #        theta1 = np.zeros((1, self.input_size + 1))
 #        theta2 = np.zeros((1, self.hidden_size + 1))
 #        with open('Theta1.csv') as file_:
@@ -58,15 +60,14 @@ class NeuralNetwork(object):
         print res1
 
     def test(self):
-        self.train('who')
         pass
 
 
     def nn_cfx(self, X, y, nn_params):
-        input_size = self.input_size
-        num_labels = self.num_labels
-        hidden_size = self.hidden_size
-        lambda_ = self.lambda_
+        input_size = self.config['input_size']
+        num_labels = self.config['num_labels']
+        hidden_size = self.config['hidden_size']
+        lambda_ = self.config['lambda']
 
         theta1 = nn_params[:((hidden_size) * (input_size + 1))].reshape(
             (hidden_size, input_size + 1))
@@ -141,4 +142,4 @@ class NeuralNetwork(object):
 
 
 if __name__ == '__main__':
-    NeuralNetwork(10).test()
+    NeuralNetwork().train('trainingset_Gregory House.csv')

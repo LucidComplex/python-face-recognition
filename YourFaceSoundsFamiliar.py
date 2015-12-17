@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 import cv2
 import pyforms
@@ -6,6 +7,7 @@ from pyforms import BaseWidget
 from pyforms.Controls import ControlText, ControlLabel, ControlButton, ControlImage, ControlFile, ControlDir
 
 from FaceDetection import FaceDetection
+from NeuralNetwork import NeuralNetwork
 
 
 class YourFaceSoundsFamiliar(BaseWidget):
@@ -37,6 +39,19 @@ class YourFaceSoundsFamiliar(BaseWidget):
                       '=','_imagetotrain','=','_trainbutton']
             }]
 
+        self.nn = self.__init_nn()
+
+    def __init_nn(self):
+        nn = NeuralNetwork()
+        try:
+            with open('nn_config.json') as nn_file:
+                for config in nn_file:
+                    config = json.loads(config)
+                    nn = NeuralNetwork(config=config)
+        except IOError:
+            pass
+
+        return nn
 
     def __change_path(self):
         image = cv2.imread(self._selectfile.value)
@@ -55,7 +70,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._imagetotrain.value = resizedcroppedimages
 
     def __trainbAction(self):
-        np.savetxt("trainingset_"+ self._pername.value+".csv",self.trainingset,delimiter=",")
+        trainingset_filename = 'trainingset_' + self._pername.value + '.csv'
+        np.savetxt(trainingset_filename, self.trainingset, delimiter=",")
+        self.nn.train(trainingset_filename)
 
 if __name__ == '__main__':
     pyforms.startApp(YourFaceSoundsFamiliar)
