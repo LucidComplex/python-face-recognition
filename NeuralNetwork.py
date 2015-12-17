@@ -120,10 +120,7 @@ class NeuralNetwork(object):
 
         d3 = np.matrix(h - output)
         sg = np.matrix(sigmoid_gradient(z2))
-        print theta2.shape
-        d2 = theta2.dot(d3)*sg
-        print d2.shape
-        print 'mana'
+        d2 = np.multiply(theta2.T.dot(d3),sg)
 
         theta2_grad += d3.dot(np.matrix(a2))
         print theta2_grad.shape
