@@ -5,6 +5,9 @@ import pyforms
 from pyforms import BaseWidget
 from pyforms.Controls import ControlText, ControlLabel, ControlButton, ControlImage, ControlFile, ControlDir
 
+from FaceDetection import FaceDetection
+
+
 class YourFaceSoundsFamiliar(BaseWidget):
     def __init__(self):
         super(YourFaceSoundsFamiliar,self).__init__('Your Face Sounds Familiar')
@@ -35,12 +38,15 @@ class YourFaceSoundsFamiliar(BaseWidget):
 
 
     def __change_path(self):
-        self._predictimage.value = self._selectfile.value
+        image =  cv2.imread(self._selectfile.value)
+        self._predictimage.value = FaceDetection().drawrectangle(image)
+
 
     def __change_path_dir(self):
         listofimages = os.listdir(self._selectdir.value)
         listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename),1) for filename in listofimages]
         self._imagetotrain.value = listofimages
+
 
 
 if __name__ == '__main__':
