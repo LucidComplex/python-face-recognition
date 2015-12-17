@@ -29,13 +29,9 @@ def normalize(matrix):
 
 def sigmoid_gradient(matrix):
     return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
-<<<<<<< HEAD
 
 def wrap(*args):
-    matrix = np.empty((1, 1))
+    matrix = np.ones((1, 1))
     for a in args:
-        print a.flatten()
-        np.append(matrix, a.flatten(), axis=0)
-    print matrix
-=======
->>>>>>> 7034f5a5ec37147e31ceb441c6a3f494fd0d1219
+        matrix = np.append(matrix, a.reshape((1, a.size)))
+    return matrix[1:]
