@@ -31,6 +31,8 @@ def sigmoid_gradient(matrix):
     return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
 
 def wrap(*args):
-    matrix = np.zeros(args[0].shape)
+    matrix = np.empty((1, 1))
     for a in args:
-        matrix = np.append(matrix, a, axis=0)
+        print a.flatten()
+        np.append(matrix, a.flatten(), axis=0)
+    print matrix

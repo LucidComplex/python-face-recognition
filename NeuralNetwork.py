@@ -1,6 +1,6 @@
 import numpy as np
 from Utils import (sigmoid, sigmoid_gradient,
-    insert_bias, insert_bias_row, normalize)
+    insert_bias, insert_bias_row, normalize, wrap)
 
 class NeuralNetwork(object):
     INIT_EPSILON = 0.12
@@ -27,11 +27,11 @@ class NeuralNetwork(object):
                 all_lines += line.split(',')
             theta2 = np.array([all_lines], dtype=np.float)
         theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
-        
+
         #will use this later
         #theta1 = np.random.rand(self.hidden_size, self.input_size + 1)
         #theta2 = np.random.rand(self.num_labels, self.hidden_size + 1)
-        self.nn_params = np.append(theta1.flatten(), theta2.flatten())
+        self.nn_params = wrap(theta1, theta2)
 
     def train(self, image):
         # X = image
@@ -64,10 +64,10 @@ class NeuralNetwork(object):
         num_labels = self.num_labels
         hidden_size = self.hidden_size
         lambda_ = self.lambda_
-        
+
         theta1 = nn_params[:((hidden_size) * (input_size + 1))].reshape(
             (hidden_size, input_size + 1))
-        
+
         theta2 = nn_params[((hidden_size) * (input_size + 1)):].reshape(
             (num_labels, hidden_size + 1))
         m = X.shape[0]
@@ -80,14 +80,14 @@ class NeuralNetwork(object):
 
         z2 = theta1.dot(a1.T)
         a2 = sigmoid(z2)
-        
+
         a2 = insert_bias(a2.T)
 
         z3 = theta2.dot(a2.T)
         h = sigmoid(z3)
-        
+
         yk = np.zeros((num_labels, m))
-        
+
 
         #back propagation
 
@@ -125,8 +125,8 @@ class NeuralNetwork(object):
 
             theta2_grad += d3.dot(a2.T)
             theta1_grad += d2.dot(np.matrix(a1[t,:])) #change to t later
-        
-        return J, 
+
+        return J
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()
