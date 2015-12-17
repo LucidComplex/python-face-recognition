@@ -30,12 +30,15 @@ def normalize(matrix):
 def sigmoid_gradient(matrix):
     return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
 
-def f(x, *args):
-    J, grad = args
+def f(nn_params, *args):
+    cls, X, y = args
+    J, grad = cls.nn_cfx(X, y, nn_params)
+    print J
     return J
 
-def fprime(x, *args):
-    J, grad = args
+def fprime(nn_params, *args):
+    cls, X, y = args
+    J, grad = cls.nn_cfx(X, y, nn_params)
     return grad
 
 def wrap(*args):

@@ -12,26 +12,6 @@ class NeuralNetwork(object):
     def __init__(self, num_labels):
         self.num_labels = num_labels
 
-        theta1 = np.zeros((1, self.input_size + 1))
-        theta2 = np.zeros((1, self.hidden_size + 1))
-        """
-        with open('Theta1.csv') as file_:
-            all_lines = []
-            for line in file_:
-                all_lines += line.split(',')
-            theta1 = np.array([all_lines], dtype=np.float)
-        theta1 = theta1.reshape((self.hidden_size, self.input_size + 1))
-
-        with open('Theta2.csv') as file_:
-            all_lines = []
-            for line in file_:
-                all_lines += line.split(',')
-            theta2 = np.array([all_lines], dtype=np.float)
-        theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
-        """
-        theta1 = np.random.rand(self.hidden_size, self.input_size + 1)
-        theta2 = np.random.rand(self.num_labels, self.hidden_size + 1)
-        self.nn_params = wrap(theta1, theta2)
 
     def train(self, image):
         # X = image
@@ -51,9 +31,28 @@ class NeuralNetwork(object):
             y = np.array([all_lines], dtype=np.float)
         y = y.reshape((m, 1))
         # X = normalize(X)
-        self.nn_cfx(X, y)
+        theta1 = np.random.rand(self.hidden_size, self.input_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+        theta2 = np.random.rand(self.num_labels, self.hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+#        theta1 = np.zeros((1, self.input_size + 1))
+#        theta2 = np.zeros((1, self.hidden_size + 1))
+#        with open('Theta1.csv') as file_:
+#            all_lines = []
+#            for line in file_:
+#                all_lines += line.split(',')
+#            theta1 = np.array([all_lines], dtype=np.float)
+#        theta1 = theta1.reshape((self.hidden_size, self.input_size + 1))
+#
+#        with open('Theta2.csv') as file_:
+#            all_lines = []
+#            for line in file_:
+#                all_lines += line.split(',')
+#            theta2 = np.array([all_lines], dtype=np.float)
+#        theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
+        nn_params = wrap(theta1, theta2)
+        self.nn_cfx(X, y, nn_params)
 
-        res1 = optimize.fmin_cg(f, self.nn_params, fprime=fprime, args=self.nn_cfx(X, y), maxiter=50)
+        res1 = optimize.fmin_cg(f, nn_params, args=(self, X, y), maxiter=50,
+            fprime=fprime)
         print res1
 
     def test(self):
@@ -61,8 +60,7 @@ class NeuralNetwork(object):
         pass
 
 
-    def nn_cfx(self, X, y):
-        nn_params = self.nn_params
+    def nn_cfx(self, X, y, nn_params):
         input_size = self.input_size
         num_labels = self.num_labels
         hidden_size = self.hidden_size
