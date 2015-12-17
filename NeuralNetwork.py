@@ -11,24 +11,27 @@ class NeuralNetwork(object):
                     'num_labels': 1})
         self.INIT_EPSILON = initialize_epsilon(self.config['input_size'],
             self.config['hidden_size'])
+        input_size = self.config['input_size']
+        hidden_size = self.config['hidden_size']
+        num_labels = self.config['num_labels']
         try:
             theta1 = None
             theta2 = None
-            with open('Theta1.csv') as file_:
-                all_lines = []
-                for line in file_:
-                    all_lines += line.split(',')
-                theta1 = np.array([all_lines], dtype=np.float)
-            theta1 = theta1.reshape((self.hidden_size, self.input_size + 1))
             with open('Theta1.csv') as theta1_file:
                 all_lines = []
                 for line in theta1_file:
                     all_lines += line.split(',')
-                theta2 = np.array([all_lines])
-            theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
+                theta1 = np.array([all_lines], dtype=np.float)
+            theta1 = theta1.reshape((hidden_size, input_size + 1))
+            with open('Theta2.csv') as theta2_file:
+                all_lines = []
+                for line in theta2_file:
+                    all_lines += line.split(',')
+                theta2 = np.array([all_lines], dtype=np.float)
+            theta2 = theta2.reshape((num_labels, hidden_size + 1))
         except IOError:
-            theta1 = np.random.rand(self.config['hidden_size'], self.config['input_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
-            theta2 = np.random.rand(self.config['num_labels'], self.config['hidden_size'] + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+            theta1 = np.random.rand(hidden_size, input_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+            theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
         finally:
             self.nn_params = wrap(theta1, theta2)
 
