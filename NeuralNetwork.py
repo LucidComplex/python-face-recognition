@@ -126,6 +126,7 @@ class NeuralNetwork(object):
             theta2_grad += d3.dot(a2.T)
             theta1_grad += d2.dot(np.matrix(a1[t,:])) #change to t later
         
+        return J, 
 
 if __name__ == '__main__':
     NeuralNetwork(10).test()
