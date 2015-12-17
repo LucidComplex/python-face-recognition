@@ -4,13 +4,32 @@ from Utils import sigmoid, insert_bias, normalize
 class NeuralNetwork(object):
     INIT_EPSILON = 0.12
     input_size = 20 * 20
-    hidden_size = 400
+    hidden_size = 25
     lambda_ = 0
 
     def __init__(self, num_labels):
         self.num_labels = num_labels
-        theta1 = np.random.rand(self.input_size, self.input_size + 1)
-        theta2 = np.random.rand(num_labels, self.input_size + 1)
+
+        theta1 = np.zeros((1, self.input_size + 1))
+        theta2 = np.zeros((1, self.hidden_size + 1))
+
+        with open('Theta1.csv') as file_:
+            all_lines = []
+            for line in file_:
+                all_lines += line.split(',')
+            theta1 = np.array([all_lines], dtype=np.float)
+        theta1 = theta1.reshape((self.hidden_size, self.input_size + 1))
+
+        with open('Theta2.csv') as file_:
+            all_lines = []
+            for line in file_:
+                all_lines += line.split(',')
+            theta2 = np.array([all_lines], dtype=np.float)
+        theta2 = theta2.reshape((self.num_labels, self.hidden_size + 1))
+        
+        #will use this later
+        #theta1 = np.random.rand(self.hidden_size, self.input_size + 1)
+        #theta2 = np.random.rand(self.num_labels, self.hidden_size + 1)
         self.nn_params = np.append(theta1.flatten(), theta2.flatten())
 
     def train(self, image):
@@ -42,12 +61,13 @@ class NeuralNetwork(object):
         nn_params = self.nn_params
         input_size = self.input_size
         num_labels = self.num_labels
-
-        theta1 = nn_params[:(input_size * (input_size + 1))].reshape(
-            (input_size, input_size + 1))
-        theta2 = nn_params[(input_size * (input_size + 1)):].reshape(
-            (num_labels, input_size + 1))
-
+        hidden_size = self.hidden_size
+        
+        theta1 = nn_params[:((hidden_size) * (input_size + 1))].reshape(
+            (hidden_size, input_size + 1))
+        
+        theta2 = nn_params[((hidden_size) * (input_size + 1)):].reshape(
+            (num_labels, hidden_size + 1))
         m = X.shape[0]
 
         J = 0
@@ -58,7 +78,7 @@ class NeuralNetwork(object):
 
         z2 = theta1.dot(X.T)
         a2 = sigmoid(z2)
-
+        
         a2 = insert_bias(a2.T)
 
         z3 = theta2.dot(a2.T)

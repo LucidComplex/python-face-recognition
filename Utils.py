@@ -6,9 +6,8 @@ def sigmoid(z):
 
 
 def insert_bias(matrix):
-    matrix = np.insert(matrix, 0, np.ones((matrix.shape[0], 1)),
+    matrix = np.insert(matrix, 0, 1,
             axis=1)
-    print matrix
     return matrix
 
 
