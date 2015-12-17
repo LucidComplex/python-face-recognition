@@ -1,6 +1,7 @@
 import numpy as np
+from scipy import optimize
 from Utils import (sigmoid, sigmoid_gradient,
-    insert_bias, insert_bias_row, normalize)
+    insert_bias, insert_bias_row, normalize, f, fprime)
 
 class NeuralNetwork(object):
     INIT_EPSILON = 0.12
@@ -51,14 +52,17 @@ class NeuralNetwork(object):
             y = np.array([all_lines], dtype=np.float)
         y = y.reshape((m, 1))
         # X = normalize(X)
-        self.cost_function(X, y)
+        self.nn_cfx(X, y)
+
+        res1 = optimize.fmin_cg(f, self.nn_params, fprime=fprime, args=self.nn_cfx(X, y), maxiter=50)
+        print res1
 
     def test(self):
         self.train('who')
         pass
 
 
-    def cost_function(self, X, y):
+    def nn_cfx(self, X, y):
         nn_params = self.nn_params
         input_size = self.input_size
         num_labels = self.num_labels
@@ -134,7 +138,7 @@ class NeuralNetwork(object):
         theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))        
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
 
-        return J, np.append(theta1_grad.flatten(), theta2_grad.flatten()).shape
+        return J, np.append(theta1_grad.flatten(), theta2_grad.flatten())
         
 
 if __name__ == '__main__':

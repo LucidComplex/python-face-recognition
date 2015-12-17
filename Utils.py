@@ -29,3 +29,13 @@ def normalize(matrix):
 
 def sigmoid_gradient(matrix):
     return np.multiply(sigmoid(matrix),(1-sigmoid(matrix)))
+
+
+def f(x, *args):
+    J, grad = args
+    return J
+
+def fprime(x, *args):
+    J, grad = args
+    return grad
+
