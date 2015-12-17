@@ -23,6 +23,8 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._predicteddetails = ControlLabel('Details')
         self._name = ControlLabel('Name: ')
         self._fscore = ControlLabel('FScore: ')
+        self._predictbutton = self.__predictbAction
+
         #Train Tab
         self._pername = ControlText('Name')
         self._selectdir = ControlDir()
@@ -41,6 +43,10 @@ class YourFaceSoundsFamiliar(BaseWidget):
 
         self.nn = self.__init_nn()
 
+    def __predictbAction(self):
+        predictset_filename = 'predictset.csv'
+        np.savetxt(predictset_filename,self.predictset, delimiter=',')
+
     def __init_nn(self):
         nn = NeuralNetwork()
         try:
@@ -56,6 +62,10 @@ class YourFaceSoundsFamiliar(BaseWidget):
     def __change_path(self):
         image = cv2.imread(self._selectfile.value)
         self._predictimage.value = FaceDetection().drawrectangle(image)
+        resizedimage = FaceDetection().resizeimageb(self._predictimage.value)
+        croppedimage = FaceDetection().cropface(resizedimage)
+        resizedcroppedimage = FaceDetection().resizeimagea(croppedimage)
+        self.predictset = np.array(resizedcroppedimage).flatten()
 
     def __change_path_dir(self):
         self._imagetotrain.value = []
