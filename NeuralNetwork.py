@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import optimize
-from Utils import (sigmoid, sigmoid_gradient,
+from Utils import (sigmoid, sigmoid_gradient, predict,
     insert_bias, insert_bias_row, normalize, wrap, f, fprime, initialize_epsilon)
 
 class NeuralNetwork(object):
@@ -30,7 +30,7 @@ class NeuralNetwork(object):
                 all_lines += line.split(',')
             y = np.array([all_lines], dtype=np.float)
         y = y.reshape((m, 1))
-        INIT_EPSILON = initialize_epsilon(self.input_size, self.hidden_size)
+        Self.INIT_EPSILON = initialize_epsilon(self.input_size, self.hidden_size)
 
         # X = normalize(X)
         theta1 = np.random.rand(self.hidden_size, self.input_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
@@ -136,7 +136,7 @@ class NeuralNetwork(object):
 
         theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
-
+        predict(theta1_grad, theta2_grad, X, y)
         return J, wrap(theta1_grad, theta2_grad)
 
 
