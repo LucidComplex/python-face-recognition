@@ -60,7 +60,6 @@ class NeuralNetwork(object):
             for line in file_:
                 all_lines += line.split(',')
             y = np.array([all_lines], dtype=np.float)
-        print y.shape
         y = y.reshape((m, 1))
 
         X, mu, sigma = normalize(X)
@@ -103,11 +102,12 @@ class NeuralNetwork(object):
         a2 = sigmoid(z2)
 
         a2 = insert_bias(a2.T)
+        print theta2.shape
 
         z3 = theta2.dot(a2.T)
         h = sigmoid(z3)
-        return h
         print h
+        return h
 
     def nn_cfx(self, X, y, nn_params):
         input_size = self.config['input_size']

@@ -59,6 +59,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
         except IOError:
             learned = {}
 
+        config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(learned))}
+        self.nn = NeuralNetwork(config=config)
+
         return learned
 
     def __predictbAction(self):
