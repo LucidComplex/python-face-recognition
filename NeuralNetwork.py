@@ -29,16 +29,23 @@ class NeuralNetwork(object):
                     all_lines += line.split(',')
                 theta2 = np.array([all_lines], dtype=np.float)
             theta2 = theta2.reshape((num_labels, hidden_size + 1))
-        except IOError:
+        except (IOError, ValueError):
             theta1 = np.random.rand(hidden_size, input_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
             theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
         finally:
             self.nn_params = wrap(theta1, theta2)
 
 
-    def train(self, image_matrix_path):
-        # X = image
-        y = np.zeros((1, 1))
+    def clear(self):
+        self.nn_params = None
+        input_size = self.config['input_size']
+        hidden_size = self.config['hidden_size']
+        num_labels = self.config['num_labels']
+        theta1 = np.random.rand(hidden_size, input_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+        theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
+        self.nn_params = wrap(theta1, theta2)
+
+    def train(self, image_matrix_path, label):
         m = 0
         with open(image_matrix_path) as file_:
             all_lines = []
@@ -47,17 +54,19 @@ class NeuralNetwork(object):
                 all_lines += line.split(',')
             X = np.array([all_lines], dtype=np.float)
         X = X.reshape((m, self.config['input_size']))
-        """
-        with open('y.csv') as file_:
+        with open(label) as file_:
             all_lines = []
             for line in file_:
                 all_lines += line.split(',')
             y = np.array([all_lines], dtype=np.float)
         y = y.reshape((m, 1))
-        """
-        y = np.ones((10, self.config['num_labels']))
 
         X, mu, sigma = normalize(X)
+
+        # save X, mu and sigma
+        np.savetxt('X.csv', X, delimiter=',')
+        np.savetxt('mu.csv', mu, delimiter=',')
+        np.savetxt('sigma.csv', sigma, delimiter=',')
 
         self.nn_params = optimize.fmin_cg(f, self.nn_params, args=(self, X, y), maxiter=50,
             fprime=fprime)
@@ -73,9 +82,29 @@ class NeuralNetwork(object):
         np.savetxt('Theta1.csv', theta1, delimiter=',')
         np.savetxt('Theta2.csv', theta2, delimiter=',')
 
-    def predict(self, image):
-        pass
+    def predict(self, image_matrix):
+        X = image_matrix.reshape((1, image_matrix.size))
+        mu = np.loadtxt('mu.csv')
+        sigma = np.loadtxt('sigma.csv')
+        X, mu, sigma = normalize(X, mu, sigma)
+        hidden_size = self.config['hidden_size']
+        input_size = self.config['input_size']
+        num_labels = self.config['num_labels']
+        theta1 = self.nn_params[:((hidden_size) * (input_size + 1))].reshape(
+            (hidden_size, input_size + 1))
+        theta2 = self.nn_params[((hidden_size) * (input_size + 1)):].reshape(
+            (num_labels, hidden_size + 1))
 
+        a1 = insert_bias(X)
+
+        z2 = theta1.dot(a1.T)
+        a2 = sigmoid(z2)
+
+        a2 = insert_bias(a2.T)
+
+        z3 = theta2.dot(a2.T)
+        h = sigmoid(z3)
+        print h
 
     def nn_cfx(self, X, y, nn_params):
         input_size = self.config['input_size']

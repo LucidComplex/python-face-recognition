@@ -23,7 +23,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._predicteddetails = ControlLabel('Details')
         self._name = ControlLabel('Name: ')
         self._fscore = ControlLabel('FScore: ')
-        self._predictbutton = self.__predictbAction
+        self._predictbutton.value = self.__predictbAction
 
         #Train Tab
         self._pername = ControlText('Name')
@@ -42,10 +42,12 @@ class YourFaceSoundsFamiliar(BaseWidget):
             }]
 
         self.nn = self.__init_nn()
+        self.learned = {}
 
     def __predictbAction(self):
         predictset_filename = 'predictset.csv'
         np.savetxt(predictset_filename,self.predictset, delimiter=',')
+        self.nn.predict(self.predictset)
 
     def __init_nn(self):
         nn = NeuralNetwork()
@@ -65,7 +67,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         resizedimage = FaceDetection().resizeimageb(self._predictimage.value)
         croppedimage = FaceDetection().cropface(resizedimage)
         resizedcroppedimage = FaceDetection().resizeimagea(croppedimage)
-        self.predictset = np.array(resizedcroppedimage).flatten()
+        self.predictset = np.array(resizedcroppedimage[1]).flatten()
 
     def __change_path_dir(self):
         self._imagetotrain.value = []
@@ -81,8 +83,37 @@ class YourFaceSoundsFamiliar(BaseWidget):
 
     def __trainbAction(self):
         trainingset_filename = 'trainingset_' + self._pername.value + '.csv'
-        np.savetxt(trainingset_filename, self.trainingset, delimiter=",")
-        self.nn.train(trainingset_filename)
+        if trainingset_filename in self.learned:
+            self.nn.train(trainingset_filename,
+                self.learned[trainingset_filename])
+        else:
+            np.savetxt(trainingset_filename, self.trainingset,
+                delimiter=",")
+            config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(self.learned) + 1)}
+            self.nn = NeuralNetwork(config=config)
+            X_matrix = np.empty((1, 1))
+            y_matrix = np.empty((1, 1))
+            self.learned[trainingset_filename] = len(self.learned) + 1
+            m = 0
+            for k, v in self.learned.iteritems():
+                with open(k) as file_:
+                    all_lines = []
+                    for line in file_:
+                        m += 1
+                        all_lines += line.split(',')
+                    X = np.array([all_lines], dtype=np.float)
+                X = X.reshape((1, X.size))
+                X_matrix = np.append(X_matrix, X)
+
+                y = np.empty((m, 1))
+                y.fill(v)
+                y_matrix = np.append(y_matrix, y)
+            X_matrix = X_matrix[1:]
+            X_matrix = X_matrix.reshape((m, 30 * 30))
+            y_matrix = y_matrix[1:]
+
+            np.savetxt('X.csv', X_matrix, delimiter=',')
+            np.savetxt('y.csv', y_matrix, delimiter=',')
 
 if __name__ == '__main__':
     pyforms.startApp(YourFaceSoundsFamiliar)
