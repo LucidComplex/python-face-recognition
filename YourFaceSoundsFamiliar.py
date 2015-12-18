@@ -49,17 +49,26 @@ class YourFaceSoundsFamiliar(BaseWidget):
             }]
         self.trainingsetall = []
         self.nn = self.__init_nn()
-        self.learned = {}
+        self.learned = self.__load_learned()
 
+    def __load_learned(self):
+        try:
+            learned = np.loadtxt('learned.csv')
+        except IOError:
+            learned = {}
 
+        return learned
 
     def __predictbAction(self):
+        print self.learned
         predictset_filename = 'predictset.csv'
         np.savetxt(predictset_filename,self.predictset, delimiter=',')
         prediction = np.argmax(self.nn.predict(self.predictset)) + 1
         for k, v in self.learned.iteritems():
             if prediction == v:
                 self._name.value = k
+
+        np.savetxt('learned.csv', self.learned, delimiter=',')
 
 
     def __init_nn(self):
