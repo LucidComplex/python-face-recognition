@@ -53,14 +53,15 @@ class YourFaceSoundsFamiliar(BaseWidget):
 
     def __load_learned(self):
         try:
-            learned = np.loadtxt('learned.csv')
+            with open('learned.json') as learned_file:
+                for line in learned_file:
+                    learned = json.loads(line)
         except IOError:
             learned = {}
 
         return learned
 
     def __predictbAction(self):
-        print self.learned
         predictset_filename = 'predictset.csv'
         np.savetxt(predictset_filename,self.predictset, delimiter=',')
         prediction = np.argmax(self.nn.predict(self.predictset)) + 1
@@ -68,7 +69,6 @@ class YourFaceSoundsFamiliar(BaseWidget):
             if prediction == v:
                 self._name.value = k
 
-        np.savetxt('learned.csv', self.learned, delimiter=',')
 
 
     def __init_nn(self):
@@ -136,6 +136,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
             self._totrainlist.__add__([self._pername.value])
             np.savetxt(trainingset_filename, self.trainingsetimage,
                 delimiter=',')
+
+        with open('learned.json', 'w') as learned_file:
+            learned_file.write(json.dumps(self.learned))
 
 
 if __name__ == '__main__':
