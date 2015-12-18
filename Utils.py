@@ -80,6 +80,7 @@ def accuracy(p, y):
 
 #calculates total fscores of list of fscores
 def total_fscore(*args):
+    factor = 0.0000000001
     total = 0.0
     P_total = 0.0
     R_total = 0.0
@@ -87,7 +88,7 @@ def total_fscore(*args):
         for i in a:
             P_total += i.precision()
             R_total += i.recall()
-    total = (2.0*P_total*R_total)/(P_total+R_total)
+    total = (2.0*P_total*R_total)/(P_total + R_total + factor)
 
     return total
 
