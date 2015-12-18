@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
@@ -76,3 +77,43 @@ def accuracy(p, y):
     accuracy = (sum/p.shape[0])*100
     print accuracy
     return accuracy
+
+#calculates total fscores of list of fscores
+def total_fscore(*args):
+    total = 0.0
+    for a in args:
+        total += a.calculate_f_score()
+    return total
+
+#outputs list of fscores for outputs
+#p: already predicted value
+#y: the output
+#outputs: the number of outputs
+def list_of_fscores(p, y, outputs):
+    fscores = [fscore()]*int(outputs)
+    for i in range(outputs):
+        for j in range(y.shape[0]):
+            #positive
+            print 'iter: ' , i ,'yeeeeah: ', p[j], ' yeeahh ', y[j]
+            if p[j] == i:
+                #true
+                if p[j] == y[j]:
+                    print 'true pos'
+                    fscores[i].true_pos += 1
+                #false
+                else:
+                    print 'false pos'
+                    fscores[i].false_pos += 1
+            #negative
+            elif p[j] != i:
+                #true
+                if p[j] == y[j]:
+                    print 'true neg'
+                    fscores[i].true_neg += 1
+                else:
+                    print 'false neg'
+                    fscores[i].false_neg += 1
+    return fscores
+
+if __name__ == '__main__':
+    list_of_fscores(np.array([0,0,0]), np.array([1,1,1]),2)
