@@ -17,12 +17,13 @@ class YourFaceSoundsFamiliar(BaseWidget):
         #Predict Tab
         self._imagepath = ControlText('Path')
         self._browsebuttonpredict = ControlButton('Browse')
+        self._nametopred = ControlText('Name')
         self._selectfile = ControlFile()
         self._selectfile.changed = self.__change_path
         self._predictimage = ControlImage()
         self._predictbutton = ControlButton('Predict')
         self._predicteddetails = ControlLabel('Details')
-        self._name = ControlLabel('Name: ')
+        self._name = ControlLabel('Recognized Name: ')
         self._fscore = ControlLabel('FScore: ')
         self._predictbutton.value = self.__predictbAction
 
@@ -38,7 +39,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._trainbutton = ControlButton('Train')
         self._trainbutton.value = self.__trainbAction
         self._formset = [{
-            'Predict':['_selectfile','=','_predictimage',
+            'Predict':['_selectfile','=','_nametopred','=','_predictimage',
                        '=','_predictbutton','=',
                        '_predicteddetails','=','_name',
                        '=','_fscore'],
