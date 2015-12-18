@@ -1,6 +1,6 @@
 import numpy as np
 import math
-
+from fscore import fscore
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
@@ -80,7 +80,6 @@ def accuracy(p, y):
 
 #calculates total fscores of list of fscores
 def total_fscore(*args):
-    factor = 0.0000000001
     total = 0.0
     P_total = 0.0
     R_total = 0.0
@@ -88,8 +87,10 @@ def total_fscore(*args):
         for i in a:
             P_total += i.precision()
             R_total += i.recall()
-    total = (2.0*P_total*R_total)/(P_total + R_total + factor)
-
+    if (P_total + R_total) == 0:
+        return 0.0
+    
+    total = (2.0*P_total*R_total)/(P_total + R_total)
     return total
 
 #outputs list of fscores for outputs
