@@ -106,6 +106,7 @@ class NeuralNetwork(object):
 
         z3 = theta2.dot(a2.T)
         h = sigmoid(z3)
+        return h
         print h
 
     def nn_cfx(self, X, y, nn_params):
