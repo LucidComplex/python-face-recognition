@@ -4,7 +4,8 @@ import numpy as np
 import cv2
 import pyforms
 from pyforms import BaseWidget
-from pyforms.Controls import ControlText, ControlLabel, ControlButton, ControlImage, ControlFile, ControlDir
+from pyforms.Controls import ControlText, ControlLabel, ControlButton, ControlImage, ControlFile, ControlDir, \
+    ControlList
 
 from FaceDetection import FaceDetection
 from NeuralNetwork import NeuralNetwork
@@ -23,13 +24,17 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._predicteddetails = ControlLabel('Details')
         self._name = ControlLabel('Name: ')
         self._fscore = ControlLabel('FScore: ')
-        self._predictbutton = self.__predictbAction
+        self._predictbutton.value = self.__predictbAction
 
         #Train Tab
         self._pername = ControlText('Name')
         self._selectdir = ControlDir()
         self._selectdir.changed = self.__change_path_dir
         self._imagetotrain = ControlImage()
+        self._totrainlist = ControlList("To Train",defaultValue=[])
+        self.traininglist = self._totrainlist.value
+        self._addtolistbutton = ControlButton('Add')
+        self._addtolistbutton.value = self.__addtolistbAction
         self._trainbutton = ControlButton('Train')
         self._trainbutton.value = self.__trainbAction
         self._formset = [{
@@ -38,10 +43,13 @@ class YourFaceSoundsFamiliar(BaseWidget):
                        '_predicteddetails','=','_name',
                        '=','_fscore'],
             'Train': ['_pername','=','_selectdir',
-                      '=','_imagetotrain','=','_trainbutton']
+                      '=','_imagetotrain','=','_addtolistbutton','=',
+                      '_totrainlist','=','_trainbutton']
             }]
-
+        self.trainingsetall = []
         self.nn = self.__init_nn()
+
+
 
     def __predictbAction(self):
         predictset_filename = 'predictset.csv'
@@ -68,6 +76,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self.predictset = np.array(resizedcroppedimage).flatten()
 
     def __change_path_dir(self):
+        name = self._selectdir.value
+        name = name.split('/')
+        self._pername.value = name.pop(len(name)-1)
         self._imagetotrain.value = []
         listofimages = os.listdir(self._selectdir.value)
         listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename)) for filename in listofimages]
@@ -76,13 +87,21 @@ class YourFaceSoundsFamiliar(BaseWidget):
         resized_images = [FaceDetection().resizeimagea(image) for image in croppedimages if image is not None]
         resizedcroppedimages = [image[0] for image in resized_images]
         resizedcroppedimagesgray = [image[1] for image in resized_images]
-        self.trainingset = [np.array(image).flatten() for image in resizedcroppedimagesgray]
+        self.trainingsetimage = [np.array(image).flatten() for image in resizedcroppedimagesgray]
         self._imagetotrain.value = resizedcroppedimages
 
     def __trainbAction(self):
-        trainingset_filename = 'trainingset_' + self._pername.value + '.csv'
-        np.savetxt(trainingset_filename, self.trainingset, delimiter=",")
+        trainingset_filename = 'trainingset.csv'
+        np.savetxt(trainingset_filename, self.trainingsetall, delimiter=",")
         self.nn.train(trainingset_filename)
 
+    def __addtolistbAction(self):
+        if self.traininglist.__contains__(self._pername.value):
+            print('present')
+        else:
+            self.traininglist.append(self._pername.value)
+            self.trainingsetall.append(self.trainingsetimage)
+        self._totrainlist.value = self.traininglist
+        print self.trainingsetall
 if __name__ == '__main__':
     pyforms.startApp(YourFaceSoundsFamiliar)
