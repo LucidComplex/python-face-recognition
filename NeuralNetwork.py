@@ -148,9 +148,7 @@ class NeuralNetwork(object):
 
         theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
-
         print accuracy(predict(theta1_grad, theta2_grad, X), y)
-
         return J, wrap(theta1_grad, theta2_grad)
 
 
