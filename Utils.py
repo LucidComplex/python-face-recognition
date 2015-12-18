@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import fscore
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
@@ -44,33 +45,35 @@ def fprime(nn_params, *args):
 def wrap(*args):
     matrix = np.ones((1, 1))
     for a in args:
-        print type(a)
         matrix = np.append(matrix, a.reshape((1, a.size)))
     return matrix[1:]
 
 def initialize_epsilon(L_in, L_out):
     return (math.sqrt(6)*1.0)/(math.sqrt(L_in+L_out+1))
 
-def predict(Theta1, Theta2, X):
+def predict(Theta_1, Theta_2, X):
     m = X.shape[0]
 
-    num_labels = Theta2.shape[0]
+    num_labels = Theta_2.shape[0]
     p = np.zeros((m, 1))
     a1 = insert_bias(X)
-    h1 = sigmoid(a1.dot(Theta1.T))
+    h1 = sigmoid(a1.dot(Theta_1.T))
+    
     z2 = insert_bias(h1)
-    h2 = sigmoid(z2.dot(Theta2.T))
+    h2 = sigmoid(z2.dot(Theta_2.T))
 
-    print p.shape
-    #p = h2.max(axis=1)
-    #for i in range(p.shape[0]):
-    #    print 'predicted: ', p[i]
+    p = h2.argmax(axis = 1)
 
+    for i in range(p.shape[0]):
+        p[i] += 1
     return p
 
 def accuracy(p, y):
     sum = 0.0
-    #for i in range(p.shape[0]):
-    #    #if (p[i]) == y[i]:
-    #    print p[i], ' yooow ', y[i]
-    return (sum/p.shape[0])*100
+    m = p.shape[0]
+    for i in range(m):
+        if p[i] == y[i]:
+            sum += 1
+    accuracy = (sum/p.shape[0])*100
+    print accuracy
+    return accuracy
