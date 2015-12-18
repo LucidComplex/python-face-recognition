@@ -56,7 +56,11 @@ class YourFaceSoundsFamiliar(BaseWidget):
     def __predictbAction(self):
         predictset_filename = 'predictset.csv'
         np.savetxt(predictset_filename,self.predictset, delimiter=',')
-        self.nn.predict(self.predictset)
+        prediction = np.argmax(self.nn.predict(self.predictset)) + 1
+        for k, v in self.learned.iteritems():
+            if prediction == v:
+                self._name.value = k
+
 
     def __init_nn(self):
         nn = NeuralNetwork()
@@ -94,7 +98,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         m = 0
         for k, v in self.learned.iteritems():
             n = 0
-            with open(k) as file_:
+            with open(k + '.csv') as file_:
                 all_lines = []
                 for line in file_:
                     m += 1
@@ -117,9 +121,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self.nn.train('X.csv', 'y.csv')
 
     def __addtolistbAction(self):
-        trainingset_filename = 'trainingset_' + self._pername.value + '.csv'
-        if trainingset_filename not in self.learned:
-            self.learned[trainingset_filename] = len(self.learned) + 1
+        trainingset_filename = self._pername.value + '.csv'
+        if self._pername.value not in self.learned:
+            self.learned[self._pername.value] = len(self.learned) + 1
             self._totrainlist.__add__([self._pername.value])
             np.savetxt(trainingset_filename, self.trainingsetimage,
                 delimiter=',')
