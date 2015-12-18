@@ -90,7 +90,7 @@ def total_fscore(*args):
     if (P_total + R_total) == 0:
         return 0.0
     
-    total = (2.0*P_total*R_total)/(P_total + R_total)
+    total = ((2.0*P_total*R_total)/(P_total + R_total))
     return total
 
 #outputs list of fscores for outputs
