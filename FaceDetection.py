@@ -38,6 +38,7 @@ class FaceDetection():
         return resized
 
     def resizeimagea(self, image):
+        print image
         resized = cv2.resize(image, (30,30), interpolation=cv2.INTER_AREA)
         resizedgray = cv2.cvtColor(resized,cv2. COLOR_BGR2GRAY)
         return resized, resizedgray

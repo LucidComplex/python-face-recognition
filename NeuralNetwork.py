@@ -45,7 +45,7 @@ class NeuralNetwork(object):
         theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
         self.nn_params = wrap(theta1, theta2)
 
-    def train(self, image_matrix_path, label):
+    def train(self, image_matrix_path, label_path):
         m = 0
         with open(image_matrix_path) as file_:
             all_lines = []
@@ -54,11 +54,13 @@ class NeuralNetwork(object):
                 all_lines += line.split(',')
             X = np.array([all_lines], dtype=np.float)
         X = X.reshape((m, self.config['input_size']))
-        with open(label) as file_:
+        print X.shape
+        with open(label_path) as file_:
             all_lines = []
             for line in file_:
                 all_lines += line.split(',')
             y = np.array([all_lines], dtype=np.float)
+        print y.shape
         y = y.reshape((m, 1))
 
         X, mu, sigma = normalize(X)
