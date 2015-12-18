@@ -81,8 +81,14 @@ def accuracy(p, y):
 #calculates total fscores of list of fscores
 def total_fscore(*args):
     total = 0.0
+    P_total = 0.0
+    R_total = 0.0
     for a in args:
-        total += a.calculate_f_score()
+        for i in a:
+            P_total += i.precision()
+            R_total += i.recall()
+    total = (2.0*P_total*R_total)/(P_total+R_total)
+
     return total
 
 #outputs list of fscores for outputs
@@ -94,26 +100,21 @@ def list_of_fscores(p, y, outputs):
     for i in range(outputs):
         for j in range(y.shape[0]):
             #positive
-            print 'iter: ' , i ,'yeeeeah: ', p[j], ' yeeahh ', y[j]
             if p[j] == i:
                 #true
                 if p[j] == y[j]:
-                    print 'true pos'
                     fscores[i].true_pos += 1
                 #false
                 else:
-                    print 'false pos'
                     fscores[i].false_pos += 1
             #negative
             elif p[j] != i:
                 #true
                 if p[j] == y[j]:
-                    print 'true neg'
                     fscores[i].true_neg += 1
                 else:
-                    print 'false neg'
                     fscores[i].false_neg += 1
     return fscores
 
 if __name__ == '__main__':
-    list_of_fscores(np.array([0,0,0]), np.array([1,1,1]),2)
+    print total_fscore(list_of_fscores(np.array([1,0,0]), np.array([1,1,1]),2))
