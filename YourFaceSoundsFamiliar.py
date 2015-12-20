@@ -57,6 +57,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._trainingPercent = .6
         self.learned = self.__load_learned()
         self._cvs = np.array([])
+        self.training_percentage = 0.6
+        self._k = 3
+        self.cross_validation_set = [[]]*self._k
 
     def __load_learned(self):
         try:
@@ -118,6 +121,21 @@ class YourFaceSoundsFamiliar(BaseWidget):
         # self._imagetotest.repaint()
 
     # def __getTestingSet(self):
+        training_images = resizedcroppedimagesgray[0:int(len(resizedcroppedimagesgray)*(self.training_percentage))]
+        testing_images = resizedcroppedimagesgray[int(len(resizedcroppedimagesgray)*(self.training_percentage)):]
+        self.trainingsetimage = [np.array(image).flatten() for image in training_images]
+        self.testingsetimage = [np.array(image).flatten() for image in testing_images]
+        print len(self.trainingsetimage), 'and', len(self.trainingsetimage[0])
+        l = 0
+        for j in self.trainingsetimage:
+            if l == self._k:
+                l = 0
+            if len(self.cross_validation_set[l]) == 0:
+                self.cross_validation_set[l] = [j]    
+            else:
+                self.cross_validation_set[l] = [self.cross_validation_set, [j]]
+            l += 1
+        self._imagetotrain.value = resizedcroppedimages
 
     def __trainbAction(self):
         config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(self.learned))}
