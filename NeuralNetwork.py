@@ -83,6 +83,13 @@ class NeuralNetwork(object):
         np.savetxt('Theta1.csv', theta1, delimiter=',')
         np.savetxt('Theta2.csv', theta2, delimiter=',')
 
+        #test the model
+        p = predict1(theta1, theta2, X)
+        accuracy = accuracy(p, y)
+        l_fscores = list_of_fscores(p, y, self.num_labels)
+        fscore = total_fscore(l_fscores)
+
+
     def predict(self, image_matrix):
         X = image_matrix.reshape((1, image_matrix.size))
         mu = np.loadtxt('mu.csv')

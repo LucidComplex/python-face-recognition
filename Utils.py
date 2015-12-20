@@ -75,7 +75,7 @@ def accuracy(p, y):
         if p[i] == y[i]:
             sum += 1
     accuracy = (sum/p.shape[0])*100
-    print accuracy
+    print 'accuracy: ', accuracy
     return accuracy
 
 #calculates total fscores of list of fscores
@@ -90,7 +90,7 @@ def total_fscore(*args):
     if (P_total + R_total) == 0:
         return 0.0
     
-    total = ((2.0*P_total*R_total)/(P_total + R_total))
+    total = np.mean(((2.0*P_total*R_total)/(P_total + R_total)))
     return total
 
 #outputs list of fscores for outputs
