@@ -57,6 +57,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._trainingPercent = 0.6
         self.learned = self.__load_learned()
         self.cross_validation_set = [[]]*self._k
+        self.cross_validation_set_y = [[]]*self._k
+        self.test_set = []
+        self.testing_y = []
 
     def __load_learned(self):
         try:
@@ -119,9 +122,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
             if l == self._k:
                 l = 0
             if len(self.cross_validation_set[l]) == 0:
-                self.cross_validation_set[l] = [j]    
+                self.cross_validation_set[l] = [j]
             else:
-                self.cross_validation_set[l] = [self.cross_validation_set, [j]]
+                self.cross_validation_set[l] += list(j)
             l += 1
         self._imagetotrain.value = resizedcroppedimages
 
@@ -153,12 +156,24 @@ class YourFaceSoundsFamiliar(BaseWidget):
         np.savetxt('X.csv', X_matrix, delimiter=',')
         np.savetxt('y.csv', y_matrix, delimiter=',')
 
-        self.nn.train('X.csv', 'y.csv', self.cross_validation_set, self.testingsetimage)
+        self.nn.train('X.csv', 'y.csv', self.cross_validation_set, self.testingsetimage, self.cross_validation_set_y, self.testing_y)
 
     def __addtolistbAction(self):
+        print 'add'
         trainingset_filename = self._pername.value + '.csv'
         if self._pername.value not in self.learned:
-            self.learned[self._pername.value] = len(self.learned) + 1
+            label = len(self.learned) + 1
+            self.learned[self._pername.value] = label
+
+            for i in range(self._k):
+                if len(self.cross_validation_set[i]) == 0:
+                    self.cross_validation_set_y[i]  = [label]*len(self.cross_validation_set[i])
+                else:
+                    self.cross_validation_set_y[i] += list([label]*len(self.cross_validation_set[i]))
+
+            self.test_set += list(self.testingsetimage)
+            self.testing_y += [label]*(len(self.testingsetimage))
+
             self._totrainlist.__add__([self._pername.value])
             np.savetxt(trainingset_filename, self.trainingsetimage,
                 delimiter=',')

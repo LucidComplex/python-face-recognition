@@ -1,7 +1,8 @@
 import numpy as np
 from scipy import optimize
-from Utils import (sigmoid, sigmoid_gradient, predict, accuracy,
-    insert_bias, insert_bias_row, normalize, wrap, f, fprime, initialize_epsilon)
+from Utils import (sigmoid, sigmoid_gradient, accuracy, predict1, list_of_fscores,
+    insert_bias, insert_bias_row, normalize, wrap, f, fprime, initialize_epsilon,
+    total_fscore)
 
 class NeuralNetwork(object):
 
@@ -45,7 +46,7 @@ class NeuralNetwork(object):
         theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
         self.nn_params = wrap(theta1, theta2)
 
-    def train(self, image_matrix_path, label_path, cv_set, test_set):
+    def train(self, image_matrix_path, label_path, cv_set, test_set, cv_y, test_y):
         m = 0
         with open(image_matrix_path) as file_:
             all_lines = []
@@ -69,7 +70,7 @@ class NeuralNetwork(object):
         np.savetxt('mu.csv', mu, delimiter=',')
         np.savetxt('sigma.csv', sigma, delimiter=',')
 
-        self.nn_params = optimize.fmin_cg(f, self.nn_params, args=(self, X, y), maxiter=50,
+        self.nn_params = optimize.fmin_cg(f, self.nn_params, args=(self, X, y), maxiter=2,
             fprime=fprime)
 
         # save nn_parameters
@@ -85,25 +86,28 @@ class NeuralNetwork(object):
 
         #test the model 
         p = predict1(theta1, theta2, X)
-        accuracy = accuracy(p, y)
+        _accuracy = accuracy(p, y)
         l_fscores = list_of_fscores(p, y, self.num_labels)
         fscore = total_fscore(l_fscores)
 
         #test the model on cross validation set
-        fscores_cv = []
-        accuracy_cv = []
+        fscores_cv = []*len(cv_set)
+        accuracy_cv = []*len(cv_set)
+        l_fscores_cv = []*len(cv_set)
+        no = 0
         for cv in cv_set:
             p_cv = predict1(theta1, theta2, cv)
-            accuracy_cv = accuracy(p_cv, y)
-            l_fscores_cv = list_of_fscores(p_cv, y, self.num_labels)
+            accuracy_cv[no] = accuracy(p_cv, cv_y[no])
+            l_fscores_cv[no] = list_of_fscores(p_cv, cv_y[no], self.num_labels)
             fscore_cv = total_fscore(l_fscores_cv)
             fscores_cv.append(fscore_cv)
             accuracy.append(accuracy_cv)
+            no += 1
 
         #test the model on test set
         p_test = predict1(theta1, theta2, test_set)
-        accuracy_test = accuracy(p_test, y)
-        l_fscores_test = list_of_fscores(p_test, y, self.num_labels)
+        accuracy_test = accuracy(p_test, test_y)
+        l_fscores_test = list_of_fscores(p_test, test_y, self.num_labels)
         fscore_test = total_fscore(l_fscores_test)
 
         print 'here are the shizz results:'
@@ -213,7 +217,7 @@ class NeuralNetwork(object):
 
         theta2_grad[:,0] = np.matrix(theta2_grad[:,0]/(m*1.0))
         theta2_grad[:,1:] = (theta2_grad[:,1:]*(1/(m*1.0)) + ((lambda_/(m*1.0)*theta2[:,1:])))
-        print accuracy(predict(theta1_grad, theta2_grad, X), y)
+        #print accuracy(predict1(theta1_grad, theta2_grad, X), y)
         return J, wrap(theta1_grad, theta2_grad)
 
 

@@ -51,7 +51,7 @@ def wrap(*args):
 def initialize_epsilon(L_in, L_out):
     return (math.sqrt(6)*1.0)/(math.sqrt(L_in+L_out+1))
 
-def predict(Theta_1, Theta_2, X):
+def predict1(Theta_1, Theta_2, X):
     m = X.shape[0]
 
     num_labels = Theta_2.shape[0]
