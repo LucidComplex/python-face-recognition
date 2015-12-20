@@ -50,9 +50,9 @@ class NeuralNetwork(object):
     def train(self, image_matrix_path, label_path, cv_set, test_set, cv_y, test_y):
         col = self.config['input_size']
         print col
-        print len(cv_set[0])
+        print len(cv_set[0])/col
         for s in range(len(cv_set)):
-            cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s]), col))
+            cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s])/col, col))
         print 'sugoooooooooooooooooood'
         print 'cv[0] ', cv_set[0].shape
         print 'cv[1] ', cv_set[1].shape
