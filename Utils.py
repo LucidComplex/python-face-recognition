@@ -102,7 +102,7 @@ def list_of_fscores(p, y, outputs):
     for i in range(outputs):
         for j in range(y.shape[0]):
             #positive
-            if p[j] == i:
+            if p[j] == (i+1):
                 #true
                 if p[j] == y[j]:
                     fscores[i].true_pos += 1
