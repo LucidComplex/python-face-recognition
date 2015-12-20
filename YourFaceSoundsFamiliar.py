@@ -32,28 +32,44 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._selectdir = ControlDir()
         self._selectdir.changed = self.__change_path_dir
         self._imagetotrain = ControlImage()
+        # self._imagetotest = ControlImage()
         self._totrainlist = ControlList("To Train",defaultValue=[])
         self.traininglist = self._totrainlist.value
         self._addtolistbutton = ControlButton('Add')
         self._addtolistbutton.value = self.__addtolistbAction
         self._trainbutton = ControlButton('Train')
         self._trainbutton.value = self.__trainbAction
+
+        #Formsets
         self._formset = [{
             'Predict':['_selectfile','=','_nametopred','=','_predictimage',
                        '=','_predictbutton','=',
                        '_predicteddetails','=','_name',
                        '=','_fscore'],
-            'Train': ['_pername','=','_selectdir',
-                      '=','_imagetotrain','=','_addtolistbutton','=',
-                      '_totrainlist','=','_trainbutton']
+            'Train': ['_pername', '=', '_selectdir',
+                      '=', '_imagetotrain', '=', '_addtolistbutton','=' ,
+                      '_totrainlist', '=', '_trainbutton']
             }]
         self.trainingsetall = []
         self.nn = self.__init_nn()
         self.learned = {}
         self._k = 3
         self._trainingPercent = .6
+        self.learned = self.__load_learned()
+        self._cvs = np.array([])
 
+    def __load_learned(self):
+        try:
+            with open('learned.json') as learned_file:
+                for line in learned_file:
+                    learned = json.loads(line)
+        except IOError:
+            learned = {}
 
+        config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(learned))}
+        self.nn = NeuralNetwork(config=config)
+
+        return learned
 
     def __predictbAction(self):
         predictset_filename = 'predictset.csv'
@@ -62,6 +78,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         for k, v in self.learned.iteritems():
             if prediction == v:
                 self._name.value = k
+
 
 
     def __init_nn(self):
@@ -82,18 +99,25 @@ class YourFaceSoundsFamiliar(BaseWidget):
         name = name.split('/')
         self._pername.value = name.pop(len(name)-1)
         self._imagetotrain.value = []
+        # self._imagetotest.value = []
         listofimages = os.listdir(self._selectdir.value)
+        listofimages = sorted(listofimages)
         listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename)) for filename in listofimages]
-        numberofImages = len(listofimages)
         resizedimages = [FaceDetection().resizeimageb(image) for image in listofimages]
         croppedimages = [FaceDetection().cropface(image) for image in resizedimages]
         resized_images = [FaceDetection().resizeimagea(image) for image in croppedimages if image is not None]
         resizedcroppedimages = [image[0] for image in resized_images]
         resizedcroppedimagesgray = [image[1] for image in resized_images]
-        self.trainingsetimage = [np.array(image).flatten() for image in resizedcroppedimagesgray]
-        self._imagetotrain.value = resizedcroppedimages
+        trainthisImages = resizedcroppedimagesgray[0:int(len(resizedcroppedimagesgray)*self._trainingPercent)]
+        testthisImages = resizedcroppedimagesgray[int(len(resizedcroppedimagesgray)*self._trainingPercent):]
 
-    def __getTestingSet(self):
+        self.trainingsetimage = [np.array(image).flatten() for image in trainthisImages]
+        self.testingsetimage = [np.array(image).flatten() for image in testthisImages]
+        self._imagetotrain.value = trainthisImages
+        # self._imagetotest.value = testthisImages
+        # self._imagetotest.repaint()
+
+    # def __getTestingSet(self):
 
     def __trainbAction(self):
         config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(self.learned))}
@@ -132,6 +156,9 @@ class YourFaceSoundsFamiliar(BaseWidget):
             self._totrainlist.__add__([self._pername.value])
             np.savetxt(trainingset_filename, self.trainingsetimage,
                 delimiter=',')
+
+        with open('learned.json', 'w') as learned_file:
+            learned_file.write(json.dumps(self.learned))
 
 
 if __name__ == '__main__':
