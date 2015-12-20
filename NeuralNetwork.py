@@ -54,12 +54,6 @@ class NeuralNetwork(object):
         for s in range(len(cv_set)):
             cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s])/col, col))
         print 'sugoooooooooooooooooood'
-        print 'cv[0] ', cv_set[0].shape
-        print 'cv[1] ', cv_set[1].shape
-        print 'cv[2] ', cv_set[2].shape
-        print 'cvy[0] ', cv_y[0].shape
-        print 'cvy[1] ', cv_y[1].shape
-        print 'cvy[2] ', cv_y[2].shape
         print 'test ', test_set.shape
         print 'testy ', test_y.shape
         sys.exit(0)

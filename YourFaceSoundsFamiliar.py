@@ -118,13 +118,16 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._imagetotrain.value = trainthisImages
 
         self.cross_validation = [np.empty((0,0))]*self._k
+        self.cv_size = [0]*self._k
         l = 0
         for j in self.trainingsetimage:
             if l == self._k:
                 l = 0
             self.cross_validation[l] = np.append(self.cross_validation[l], j)
+            self.cv_size[l] += 1
             l += 1
         self._imagetotrain.value = resizedcroppedimages
+
 
     def __trainbAction(self):
         config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(self.learned))}
@@ -165,7 +168,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
 
             for i in range(self._k):
                 self.cross_validation_set[i]  = np.append(self.cross_validation_set[i], self.cross_validation[i])
-                self.cross_validation_set_y[i] = np.append(self.cross_validation_set_y[i], [label]*len(self.cross_validation[i]))
+                self.cross_validation_set_y[i] = np.append(self.cross_validation_set_y[i], [label]*self.cv_size[i])
 
             self.test_set = np.append(self.test_set, self.testingsetimage)
             self.testing_y = np.append(self.testing_y, [label]*(len(self.testingsetimage)))
