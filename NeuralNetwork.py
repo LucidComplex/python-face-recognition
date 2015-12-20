@@ -49,15 +49,11 @@ class NeuralNetwork(object):
 
     def train(self, image_matrix_path, label_path, cv_set, test_set, cv_y, test_y):
         col = self.config['input_size']
-        print col
-        print len(cv_set[0])/col
         for s in range(len(cv_set)):
             cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s])/col, col))
-        print 'sugoooooooooooooooooood'
+        test_set = np.reshape(test_set, (len(test_set)/col, col))
         print 'test ', test_set.shape
         print 'testy ', test_y.shape
-        sys.exit(0)
-
 
         m = 0
         with open(image_matrix_path) as file_:

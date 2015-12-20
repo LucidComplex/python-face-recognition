@@ -157,7 +157,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         np.savetxt('X.csv', X_matrix, delimiter=',')
         np.savetxt('y.csv', y_matrix, delimiter=',')
 
-        self.nn.train('X.csv', 'y.csv', self.cross_validation_set, self.testingsetimage, self.cross_validation_set_y, self.testing_y)
+        self.nn.train('X.csv', 'y.csv', self.cross_validation_set, self.test_set, self.cross_validation_set_y, self.testing_y)
 
     def __addtolistbAction(self):
         print 'add'
