@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from scipy import optimize
 from Utils import (sigmoid, sigmoid_gradient, accuracy, predict1, list_of_fscores,
@@ -47,6 +48,23 @@ class NeuralNetwork(object):
         self.nn_params = wrap(theta1, theta2)
 
     def train(self, image_matrix_path, label_path, cv_set, test_set, cv_y, test_y):
+        col = self.config['input_size']
+        print col
+        print len(cv_set[0])
+        for s in range(len(cv_set)):
+            cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s]), col))
+        print 'sugoooooooooooooooooood'
+        print 'cv[0] ', cv_set[0].shape
+        print 'cv[1] ', cv_set[1].shape
+        print 'cv[2] ', cv_set[2].shape
+        print 'cvy[0] ', cv_y[0].shape
+        print 'cvy[1] ', cv_y[1].shape
+        print 'cvy[2] ', cv_y[2].shape
+        print 'test ', test_set.shape
+        print 'testy ', test_y.shape
+        sys.exit(0)
+
+
         m = 0
         with open(image_matrix_path) as file_:
             all_lines = []
@@ -87,7 +105,7 @@ class NeuralNetwork(object):
         #test the model 
         p = predict1(theta1, theta2, X)
         _accuracy = accuracy(p, y)
-        l_fscores = list_of_fscores(p, y, self.num_labels)
+        l_fscores = list_of_fscores(p, y, num_labels)
         fscore = total_fscore(l_fscores)
 
         #test the model on cross validation set
@@ -96,15 +114,18 @@ class NeuralNetwork(object):
         l_fscores_cv = []*len(cv_set)
         no = 0
         for cv in cv_set:
-            p_cv = predict1(theta1, theta2, cv)
+            print np.array(cv).shape
+            X1, mu1, sigma1 = normalize(np.array(cv))
+            p_cv = predict1(theta1, theta2, X1)
             accuracy_cv[no] = accuracy(p_cv, cv_y[no])
-            l_fscores_cv[no] = list_of_fscores(p_cv, cv_y[no], self.num_labels)
+            l_fscores_cv[no] = list_of_fscores(p_cv, cv_y[no], num_labels)
             fscore_cv = total_fscore(l_fscores_cv)
             fscores_cv.append(fscore_cv)
             accuracy.append(accuracy_cv)
             no += 1
 
         #test the model on test set
+        X_test, mu_test, sigma_test = normalize(np.array(test_y))
         p_test = predict1(theta1, theta2, test_set)
         accuracy_test = accuracy(p_test, test_y)
         l_fscores_test = list_of_fscores(p_test, test_y, self.num_labels)

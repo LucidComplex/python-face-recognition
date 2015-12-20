@@ -56,10 +56,10 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._k = 3
         self._trainingPercent = 0.6
         self.learned = self.__load_learned()
-        self.cross_validation_set = [[]]*self._k
-        self.cross_validation_set_y = [[]]*self._k
-        self.test_set = []
-        self.testing_y = []
+        self.cross_validation_set = [np.empty((0,0))]*self._k
+        self.cross_validation_set_y = [np.empty((0,0))]*self._k
+        self.test_set = np.empty((0, 0))
+        self.testing_y = np.empty((0, 0))
 
     def __load_learned(self):
         try:
@@ -117,14 +117,12 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self.testingsetimage = [np.array(image).flatten() for image in testthisImages]
         self._imagetotrain.value = trainthisImages
 
+        self.cross_validation = [np.empty((0,0))]*self._k
         l = 0
         for j in self.trainingsetimage:
             if l == self._k:
                 l = 0
-            if len(self.cross_validation_set[l]) == 0:
-                self.cross_validation_set[l] = [j]
-            else:
-                self.cross_validation_set[l] += list(j)
+            self.cross_validation[l] = np.append(self.cross_validation[l], j)
             l += 1
         self._imagetotrain.value = resizedcroppedimages
 
@@ -166,13 +164,11 @@ class YourFaceSoundsFamiliar(BaseWidget):
             self.learned[self._pername.value] = label
 
             for i in range(self._k):
-                if len(self.cross_validation_set[i]) == 0:
-                    self.cross_validation_set_y[i]  = [label]*len(self.cross_validation_set[i])
-                else:
-                    self.cross_validation_set_y[i] += list([label]*len(self.cross_validation_set[i]))
+                self.cross_validation_set[i]  = np.append(self.cross_validation_set[i], self.cross_validation[i])
+                self.cross_validation_set_y[i] = np.append(self.cross_validation_set_y[i], [label]*len(self.cross_validation[i]))
 
-            self.test_set += list(self.testingsetimage)
-            self.testing_y += [label]*(len(self.testingsetimage))
+            self.test_set = np.append(self.test_set, self.testingsetimage)
+            self.testing_y = np.append(self.testing_y, [label]*(len(self.testingsetimage)))
 
             self._totrainlist.__add__([self._pername.value])
             np.savetxt(trainingset_filename, self.trainingsetimage,
