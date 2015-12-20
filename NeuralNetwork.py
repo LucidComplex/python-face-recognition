@@ -45,7 +45,7 @@ class NeuralNetwork(object):
         theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
         self.nn_params = wrap(theta1, theta2)
 
-    def train(self, image_matrix_path, label_path):
+    def train(self, image_matrix_path, label_path, cv_set, test_set):
         m = 0
         with open(image_matrix_path) as file_:
             all_lines = []
@@ -83,11 +83,34 @@ class NeuralNetwork(object):
         np.savetxt('Theta1.csv', theta1, delimiter=',')
         np.savetxt('Theta2.csv', theta2, delimiter=',')
 
-        #test the model
+        #test the model 
         p = predict1(theta1, theta2, X)
         accuracy = accuracy(p, y)
         l_fscores = list_of_fscores(p, y, self.num_labels)
         fscore = total_fscore(l_fscores)
+
+        #test the model on cross validation set
+        fscores_cv = []
+        accuracy_cv = []
+        for cv in cv_set:
+            p_cv = predict1(theta1, theta2, cv)
+            accuracy_cv = accuracy(p_cv, y)
+            l_fscores_cv = list_of_fscores(p_cv, y, self.num_labels)
+            fscore_cv = total_fscore(l_fscores_cv)
+            fscores_cv.append(fscore_cv)
+            accuracy.append(accuracy_cv)
+
+        #test the model on test set
+        p_test = predict1(theta1, theta2, test_set)
+        accuracy_test = accuracy(p_test, y)
+        l_fscores_test = list_of_fscores(p_test, y, self.num_labels)
+        fscore_test = total_fscore(l_fscores_test)
+
+        print 'here are the shizz results:'
+        print 'fscores in cross validation:'
+        for score in fscores_cv:
+            print score
+        print 'fscores in test set: ', fscore_test
 
 
     def predict(self, image_matrix):

@@ -54,11 +54,8 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self.nn = self.__init_nn()
         self.learned = {}
         self._k = 3
-        self._trainingPercent = .6
+        self._trainingPercent = 0.6
         self.learned = self.__load_learned()
-        self._cvs = np.array([])
-        self.training_percentage = 0.6
-        self._k = 3
         self.cross_validation_set = [[]]*self._k
 
     def __load_learned(self):
@@ -113,19 +110,10 @@ class YourFaceSoundsFamiliar(BaseWidget):
         resizedcroppedimagesgray = [image[1] for image in resized_images]
         trainthisImages = resizedcroppedimagesgray[0:int(len(resizedcroppedimagesgray)*self._trainingPercent)]
         testthisImages = resizedcroppedimagesgray[int(len(resizedcroppedimagesgray)*self._trainingPercent):]
-
         self.trainingsetimage = [np.array(image).flatten() for image in trainthisImages]
         self.testingsetimage = [np.array(image).flatten() for image in testthisImages]
         self._imagetotrain.value = trainthisImages
-        # self._imagetotest.value = testthisImages
-        # self._imagetotest.repaint()
 
-    # def __getTestingSet(self):
-        training_images = resizedcroppedimagesgray[0:int(len(resizedcroppedimagesgray)*(self.training_percentage))]
-        testing_images = resizedcroppedimagesgray[int(len(resizedcroppedimagesgray)*(self.training_percentage)):]
-        self.trainingsetimage = [np.array(image).flatten() for image in training_images]
-        self.testingsetimage = [np.array(image).flatten() for image in testing_images]
-        print len(self.trainingsetimage), 'and', len(self.trainingsetimage[0])
         l = 0
         for j in self.trainingsetimage:
             if l == self._k:
@@ -165,7 +153,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         np.savetxt('X.csv', X_matrix, delimiter=',')
         np.savetxt('y.csv', y_matrix, delimiter=',')
 
-        self.nn.train('X.csv', 'y.csv')
+        self.nn.train('X.csv', 'y.csv', self.cross_validation_set, self.testingsetimage)
 
     def __addtolistbAction(self):
         trainingset_filename = self._pername.value + '.csv'
