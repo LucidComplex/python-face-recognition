@@ -32,24 +32,31 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._selectdir = ControlDir()
         self._selectdir.changed = self.__change_path_dir
         self._imagetotrain = ControlImage()
+        # self._imagetotest = ControlImage()
         self._totrainlist = ControlList("To Train",defaultValue=[])
         self.traininglist = self._totrainlist.value
         self._addtolistbutton = ControlButton('Add')
         self._addtolistbutton.value = self.__addtolistbAction
         self._trainbutton = ControlButton('Train')
         self._trainbutton.value = self.__trainbAction
+
+        #Formsets
         self._formset = [{
             'Predict':['_selectfile','=','_nametopred','=','_predictimage',
                        '=','_predictbutton','=',
                        '_predicteddetails','=','_name',
                        '=','_fscore'],
-            'Train': ['_pername','=','_selectdir',
-                      '=','_imagetotrain','=','_addtolistbutton','=',
-                      '_totrainlist','=','_trainbutton']
+            'Train': ['_pername', '=', '_selectdir',
+                      '=', '_imagetotrain', '=', '_addtolistbutton','=' ,
+                      '_totrainlist', '=', '_trainbutton']
             }]
         self.trainingsetall = []
         self.nn = self.__init_nn()
+        self.learned = {}
+        self._k = 3
+        self._trainingPercent = .6
         self.learned = self.__load_learned()
+        self._cvs = np.array([])
         self.training_percentage = 0.6
         self._k = 3
         self.cross_validation_set = [[]]*self._k
@@ -95,13 +102,25 @@ class YourFaceSoundsFamiliar(BaseWidget):
         name = name.split('/')
         self._pername.value = name.pop(len(name)-1)
         self._imagetotrain.value = []
+        # self._imagetotest.value = []
         listofimages = os.listdir(self._selectdir.value)
+        listofimages = sorted(listofimages)
         listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename)) for filename in listofimages]
         resizedimages = [FaceDetection().resizeimageb(image) for image in listofimages]
         croppedimages = [FaceDetection().cropface(image) for image in resizedimages]
         resized_images = [FaceDetection().resizeimagea(image) for image in croppedimages if image is not None]
         resizedcroppedimages = [image[0] for image in resized_images]
         resizedcroppedimagesgray = [image[1] for image in resized_images]
+        trainthisImages = resizedcroppedimagesgray[0:int(len(resizedcroppedimagesgray)*self._trainingPercent)]
+        testthisImages = resizedcroppedimagesgray[int(len(resizedcroppedimagesgray)*self._trainingPercent):]
+
+        self.trainingsetimage = [np.array(image).flatten() for image in trainthisImages]
+        self.testingsetimage = [np.array(image).flatten() for image in testthisImages]
+        self._imagetotrain.value = trainthisImages
+        # self._imagetotest.value = testthisImages
+        # self._imagetotest.repaint()
+
+    # def __getTestingSet(self):
         training_images = resizedcroppedimagesgray[0:int(len(resizedcroppedimagesgray)*(self.training_percentage))]
         testing_images = resizedcroppedimagesgray[int(len(resizedcroppedimagesgray)*(self.training_percentage)):]
         self.trainingsetimage = [np.array(image).flatten() for image in training_images]
