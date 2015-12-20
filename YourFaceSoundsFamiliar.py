@@ -50,6 +50,8 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self.trainingsetall = []
         self.nn = self.__init_nn()
         self.learned = {}
+        self._k = 3
+        self._trainingPercent = .6
 
 
 
@@ -82,6 +84,7 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self._imagetotrain.value = []
         listofimages = os.listdir(self._selectdir.value)
         listofimages = [cv2.imread(os.path.join(self._selectdir.value, filename)) for filename in listofimages]
+        numberofImages = len(listofimages)
         resizedimages = [FaceDetection().resizeimageb(image) for image in listofimages]
         croppedimages = [FaceDetection().cropface(image) for image in resizedimages]
         resized_images = [FaceDetection().resizeimagea(image) for image in croppedimages if image is not None]
@@ -89,6 +92,8 @@ class YourFaceSoundsFamiliar(BaseWidget):
         resizedcroppedimagesgray = [image[1] for image in resized_images]
         self.trainingsetimage = [np.array(image).flatten() for image in resizedcroppedimagesgray]
         self._imagetotrain.value = resizedcroppedimages
+
+    def __getTestingSet(self):
 
     def __trainbAction(self):
         config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(self.learned))}
