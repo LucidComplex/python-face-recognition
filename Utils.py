@@ -75,7 +75,6 @@ def accuracy(p, y):
         if p[i] == y[i]:
             sum += 1
     accuracy = (sum/p.shape[0])*100
-    print 'accuracy: ', accuracy
     return accuracy
 
 #calculates total fscores of list of fscores
@@ -83,15 +82,13 @@ def total_fscore(*args):
     total = 0.0
     P_total = 0.0
     R_total = 0.0
+    ctr = 0.0
     for a in args:
         for i in a:
-            P_total += i.precision()
-            R_total += i.recall()
-    if (P_total + R_total) == 0:
-        return 0.0
-    
-    total = np.mean(((2.0*P_total*R_total)/(P_total + R_total)))
-    return total
+            #print i.precision(), ', ', i.recall()
+            total += i.calculate_f_score()
+            ctr += 1
+    return total/ctr
 
 #outputs list of fscores for outputs
 #p: already predicted value
@@ -110,7 +107,7 @@ def list_of_fscores(p, y, outputs):
                 else:
                     fscores[i].false_pos += 1
             #negative
-            elif p[j] != i:
+            elif p[j] != (i+1):
                 #true
                 if p[j] == y[j]:
                     fscores[i].true_neg += 1
@@ -119,4 +116,4 @@ def list_of_fscores(p, y, outputs):
     return fscores
 
 if __name__ == '__main__':
-    print total_fscore(list_of_fscores(np.array([1,0,0]), np.array([1,1,1]),2))
+    print total_fscore(list_of_fscores(np.array([1,1,1]), np.array([1,2,2]),2))

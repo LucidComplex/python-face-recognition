@@ -52,8 +52,6 @@ class NeuralNetwork(object):
         for s in range(len(cv_set)):
             cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s])/col, col))
         test_set = np.reshape(test_set, (len(test_set)/col, col))
-        print 'test ', test_set.shape
-        print 'testy ', test_y.shape
 
         m = 0
         with open(image_matrix_path) as file_:
@@ -99,32 +97,30 @@ class NeuralNetwork(object):
         fscore = total_fscore(l_fscores)
 
         #test the model on cross validation set
-        fscores_cv = []*len(cv_set)
-        accuracy_cv = []*len(cv_set)
-        l_fscores_cv = []*len(cv_set)
+        fscores_cv = [0.0]*len(cv_set)
+        accuracy_cv = [0.0]*len(cv_set)
+        l_fscores_cv = [0.0]*len(cv_set)
         no = 0
         for cv in cv_set:
-            print np.array(cv).shape
             X1, mu1, sigma1 = normalize(np.array(cv))
             p_cv = predict1(theta1, theta2, X1)
             accuracy_cv[no] = accuracy(p_cv, cv_y[no])
             l_fscores_cv[no] = list_of_fscores(p_cv, cv_y[no], num_labels)
-            fscore_cv = total_fscore(l_fscores_cv)
-            fscores_cv.append(fscore_cv)
-            accuracy.append(accuracy_cv)
+            fscore_cv = total_fscore(l_fscores_cv[no])
+            fscores_cv[no] = fscore_cv
             no += 1
 
         #test the model on test set
         X_test, mu_test, sigma_test = normalize(np.array(test_y))
         p_test = predict1(theta1, theta2, test_set)
         accuracy_test = accuracy(p_test, test_y)
-        l_fscores_test = list_of_fscores(p_test, test_y, self.num_labels)
+        l_fscores_test = list_of_fscores(p_test, test_y, num_labels)
         fscore_test = total_fscore(l_fscores_test)
 
         print 'here are the shizz results:'
         print 'fscores in cross validation:'
-        for score in fscores_cv:
-            print score
+        for kk in range(len(fscores_cv)):
+            print fscores_cv[kk], ' ', accuracy_cv[kk]
         print 'fscores in test set: ', fscore_test
 
 

@@ -20,4 +20,4 @@ class fscore(object):
 		lower_bound = (self.precision()+self.recall())
 		if lower_bound == 0:
 			return 0.0
-		return (upper_bound/(lower_bound))*100.0
+		return (upper_bound/(lower_bound))
