@@ -12,7 +12,7 @@ class FaceDetection():
         faces = faceCascade.detectMultiScale(
                     gray,
                     scaleFactor=1.05,
-                    minNeighbors=8,
+                    minNeighbors=6,
                     minSize=(30, 30),
                     flags=cv2.cv.CV_HAAR_SCALE_IMAGE
                 )

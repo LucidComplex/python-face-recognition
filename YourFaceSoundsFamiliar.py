@@ -7,6 +7,7 @@ from pyforms import BaseWidget
 from pyforms.Controls import ControlText, ControlLabel, ControlButton, ControlImage, ControlFile, ControlDir, \
     ControlList
 
+from operator import itemgetter
 from FaceDetection import FaceDetection
 from NeuralNetwork import NeuralNetwork
 
@@ -53,19 +54,25 @@ class YourFaceSoundsFamiliar(BaseWidget):
         self.trainingsetall = []
         self.nn = self.__init_nn()
         self.learned = {}
-        self._k = 3
-        self._trainingPercent = 0.6
+        self._k = 4
+        self._trainingPercent = 0.8
         self.learned = self.__load_learned()
         self.cross_validation_set = [np.empty((0,0))]*self._k
         self.cross_validation_set_y = [np.empty((0,0))]*self._k
         self.test_set = np.empty((0, 0))
         self.testing_y = np.empty((0, 0))
+        self.training_X = [np.empty((0, 900))] * self._k
+        self.training_y = [np.empty((0, 1))] * self._k
+
+        self.X = np.empty((0, 0))
 
     def __load_learned(self):
         try:
             with open('learned.json') as learned_file:
                 for line in learned_file:
                     learned = json.loads(line)
+                    for key in learned.keys():
+                        self._totrainlist.__add__([key])
         except IOError:
             learned = {}
 
@@ -132,53 +139,47 @@ class YourFaceSoundsFamiliar(BaseWidget):
     def __trainbAction(self):
         config = {'input_size': 30 * 30,  'hidden_size': 30 * 30, 'lambda': 1, 'num_labels': (len(self.learned))}
         self.nn = NeuralNetwork(config=config)
-        X_matrix = np.empty((1, 1))
-        y_matrix = np.empty((1, 1))
-        m = 0
-        for k, v in self.learned.iteritems():
-            n = 0
-            with open(k + '.csv') as file_:
-                all_lines = []
-                for line in file_:
-                    m += 1
-                    n += 1
-                    all_lines += line.split(',')
-                X = np.array([all_lines], dtype=np.float)
-            X = X.reshape((1, X.size))
-            X_matrix = np.append(X_matrix, X)
 
-            y = np.empty((n, 1))
-            y.fill(v)
-            y_matrix = np.append(y_matrix, y)
-        X_matrix = X_matrix[1:]
-        X_matrix = X_matrix.reshape((m, 30 * 30))
-        y_matrix = y_matrix[1:]
+        cost_params_fscore = []
+        for i in range(self._k):
+            cost_params_fscore.append(self.nn.train(self.training_X[i], self.training_y[i], self.cross_validation_set[i], self.test_set, self.cross_validation_set_y[i], self.testing_y))
 
-        np.savetxt('X.csv', X_matrix, delimiter=',')
-        np.savetxt('y.csv', y_matrix, delimiter=',')
+        best_model = max(cost_params_fscore, key=itemgetter(2))
+        print best_model[0], best_model[2]
 
-        self.nn.train('X.csv', 'y.csv', self.cross_validation_set, self.test_set, self.cross_validation_set_y, self.testing_y)
 
     def __addtolistbAction(self):
-        print 'add'
-        trainingset_filename = self._pername.value + '.csv'
+        ### TEST ###
+        if self._pername.value in self.learned:
+            return
+        X = np.array(self.trainingsetimage) # size: 8
+        X_set = np.empty((0, 0)) # this will be a k-sized set of X slices
+        slice_size = X.shape[0] / self._k # 2
         if self._pername.value not in self.learned:
             label = len(self.learned) + 1
             self.learned[self._pername.value] = label
-
-            for i in range(self._k):
-                self.cross_validation_set[i]  = np.append(self.cross_validation_set[i], self.cross_validation[i])
-                self.cross_validation_set_y[i] = np.append(self.cross_validation_set_y[i], [label]*self.cv_size[i])
-
-            self.test_set = np.append(self.test_set, self.testingsetimage)
-            self.testing_y = np.append(self.testing_y, [label]*(len(self.testingsetimage)))
-
-            self._totrainlist.__add__([self._pername.value])
-            np.savetxt(trainingset_filename, self.trainingsetimage,
-                delimiter=',')
+        else:
+            return
+        for i in range(self._k):
+            sliced = np.delete(X, slice(i*2, (i*2)+2), axis=0)
+            self.training_X[i] = np.append(self.training_X[i], sliced, axis=0)
+            y = np.empty((sliced.shape[0], 1))
+            y.fill(label)
+            self.training_y[i] = np.append(self.training_y[i], y, axis=0)
+            print self.training_X[i].shape
+        self._totrainlist.__add__([self._pername.value])
 
         with open('learned.json', 'w') as learned_file:
             learned_file.write(json.dumps(self.learned))
+        ############
+
+
+        for i in range(self._k):
+            self.cross_validation_set[i]  = np.append(self.cross_validation_set[i], self.cross_validation[i])
+            self.cross_validation_set_y[i] = np.append(self.cross_validation_set_y[i], [label]*self.cv_size[i])
+
+        self.test_set = np.append(self.test_set, self.testingsetimage)
+        self.testing_y = np.append(self.testing_y, [label]*(len(self.testingsetimage)))
 
 
 if __name__ == '__main__':

@@ -47,27 +47,13 @@ class NeuralNetwork(object):
         theta2 = np.random.rand(num_labels, hidden_size + 1) * 2 * self.INIT_EPSILON - self.INIT_EPSILON
         self.nn_params = wrap(theta1, theta2)
 
-    def train(self, image_matrix_path, label_path, cv_set, test_set, cv_y, test_y):
+    def train(self, X, y, cv, test_set, cv_y, test_y):
+        self.clear()
         col = self.config['input_size']
-        for s in range(len(cv_set)):
-            cv_set[s] = np.reshape(cv_set[s], (len(cv_set[s])/col, col))
+        cv = np.reshape(cv, (len(cv)/col, col))
         test_set = np.reshape(test_set, (len(test_set)/col, col))
 
         m = 0
-        with open(image_matrix_path) as file_:
-            all_lines = []
-            for line in file_:
-                m += 1
-                all_lines += line.split(',')
-            X = np.array([all_lines], dtype=np.float)
-        X = X.reshape((m, self.config['input_size']))
-        print X.shape
-        with open(label_path) as file_:
-            all_lines = []
-            for line in file_:
-                all_lines += line.split(',')
-            y = np.array([all_lines], dtype=np.float)
-        y = y.reshape((m, 1))
 
         X, mu, sigma = normalize(X)
 
@@ -76,7 +62,7 @@ class NeuralNetwork(object):
         np.savetxt('mu.csv', mu, delimiter=',')
         np.savetxt('sigma.csv', sigma, delimiter=',')
 
-        self.nn_params = optimize.fmin_cg(f, self.nn_params, args=(self, X, y), maxiter=2,
+        self.nn_params = optimize.fmin_cg(f, self.nn_params, args=(self, X, y), maxiter=50,
             fprime=fprime)
 
         # save nn_parameters
@@ -90,38 +76,38 @@ class NeuralNetwork(object):
         np.savetxt('Theta1.csv', theta1, delimiter=',')
         np.savetxt('Theta2.csv', theta2, delimiter=',')
 
-        #test the model 
+        #test the model
         p = predict1(theta1, theta2, X)
         _accuracy = accuracy(p, y)
         l_fscores = list_of_fscores(p, y, num_labels)
         fscore = total_fscore(l_fscores)
 
         #test the model on cross validation set
-        fscores_cv = [0.0]*len(cv_set)
-        accuracy_cv = [0.0]*len(cv_set)
-        l_fscores_cv = [0.0]*len(cv_set)
+        fscores_cv = 0.0
+        accuracy_cv = 0.0
+        l_fscores_cv = 0.0
         no = 0
-        for cv in cv_set:
-            X1, mu1, sigma1 = normalize(np.array(cv))
-            p_cv = predict1(theta1, theta2, X1)
-            accuracy_cv[no] = accuracy(p_cv, cv_y[no])
-            l_fscores_cv[no] = list_of_fscores(p_cv, cv_y[no], num_labels)
-            fscore_cv = total_fscore(l_fscores_cv[no])
-            fscores_cv[no] = fscore_cv
-            no += 1
+
+        X1, mu1, sigma1 = normalize(np.array(cv), mu, sigma)
+        p_cv = predict1(theta1, theta2, X1)
+        accuracy_cv = accuracy(p_cv, cv_y)
+        l_fscores_cv = list_of_fscores(p_cv, cv_y, num_labels)
+        fscores_cv = total_fscore(l_fscores_cv)
 
         #test the model on test set
-        X_test, mu_test, sigma_test = normalize(np.array(test_y))
-        p_test = predict1(theta1, theta2, test_set)
+        X_test, mu_test, sigma_test = normalize(np.array(test_set), mu, sigma)
+        p_test = predict1(theta1, theta2, X_test)
         accuracy_test = accuracy(p_test, test_y)
         l_fscores_test = list_of_fscores(p_test, test_y, num_labels)
         fscore_test = total_fscore(l_fscores_test)
 
         print 'here are the shizz results:'
         print 'fscores in cross validation:'
-        for kk in range(len(fscores_cv)):
-            print fscores_cv[kk], ' ', accuracy_cv[kk]
+        print fscores_cv, ' ', accuracy_cv
         print 'fscores in test set: ', fscore_test
+        print 'accuracy_test: ', accuracy_test
+
+        return self.nn_cfx(X, y, self.nn_params), self.nn_params, fscores_cv, fscore_test
 
 
     def predict(self, image_matrix):
